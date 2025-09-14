@@ -3,7 +3,9 @@ import { google } from "googleapis";
 import fs from "fs";
 
 const SCOPES = ["https://www.googleapis.com/auth/spreadsheets"];
-const CREDENTIALS = JSON.parse(fs.readFileSync("google-credentials.json", "utf-8"));
+const CREDENTIALS = JSON.parse(
+  fs.readFileSync("google-credentials.json", "utf-8")
+);
 
 const auth = new google.auth.GoogleAuth({
   credentials: CREDENTIALS,
@@ -12,8 +14,23 @@ const auth = new google.auth.GoogleAuth({
 
 const sheets = google.sheets({ version: "v4", auth });
 
-const SPREADSHEET_ID = "13H_XvOYjwDskZbh7e-6TQGHw4MWltkHWnJ9bKRCL9Dw"; // 👉 ID Spreadsheet
-const SHEET_NAME = "Sheet1"; // nama sheet
+const SPREADSHEET_ID =
+  "13H_XvOYjwDskZbh7e-6TQGHw4MWltkHWnJ9bKRCL9Dw"; // ID spreadsheet
+
+// 🔹 Mapping nama ruangan -> nama sheet
+const SHEET_MAP: Record<string, string> = {
+  "Ruang Rapat Dirjen": "Ruang Rapat Dirjen",
+  "Ruang Rapat Sesditjen": "Ruang Rapat Sesditjen",
+  "Command Center": "Command Center",
+  "Ruang Rapat Lt2": "Ruang Rapat Lt2",
+  "Ballroom": "Ballroom",
+};
+
+// Helper untuk dapatkan nama sheet berdasarkan room
+function getSheetName(room: string): string {
+  // return SHEET_MAP[room] || "Sheet1"; // fallback ke Sheet1 kalau tidak cocok
+  return SHEET_MAP[room];
+}
 
 // ✅ Tambahkan booking ke Google Sheets
 export async function appendBookingToSheet(bookingData: {
@@ -23,24 +40,27 @@ export async function appendBookingToSheet(bookingData: {
   endTime: string;
   pic: string;
 }) {
-  const range = `${SHEET_NAME}!A:E`;
+  const sheetName = getSheetName(bookingData.room);
+  const range = `${sheetName}!A:E`;
 
   await sheets.spreadsheets.values.append({
     spreadsheetId: SPREADSHEET_ID,
     range,
     valueInputOption: "USER_ENTERED",
     requestBody: {
-      values: [[
-        bookingData.room,
-        bookingData.date,
-        bookingData.startTime,
-        bookingData.endTime,
-        bookingData.pic,
-      ]],
+      values: [
+        [
+          bookingData.room,
+          bookingData.date,
+          bookingData.startTime,
+          bookingData.endTime,
+          bookingData.pic,
+        ],
+      ],
     },
   });
 
-  console.log("✅ Data booking berhasil disinkron ke Google Sheets");
+  console.log(`✅ Data booking masuk ke sheet "${sheetName}"`);
 }
 
 // ✅ Hapus booking dari Google Sheets
@@ -51,9 +71,9 @@ export async function deleteBookingFromSheet(bookingData: {
   endTime: string;
   pic: string;
 }) {
-  const range = `${SHEET_NAME}!A:E`;
+  const sheetName = getSheetName(bookingData.room);
+  const range = `${sheetName}!A:E`;
 
-  // Ambil semua data dari sheet
   const response = await sheets.spreadsheets.values.get({
     spreadsheetId: SPREADSHEET_ID,
     range,
@@ -61,9 +81,7 @@ export async function deleteBookingFromSheet(bookingData: {
 
   const rows = response.data.values || [];
 
-  // Normalisasi helper
-  const normalize = (val: string | undefined) =>
-    (val || "").toString().trim();
+  const normalize = (val: string | undefined) => (val || "").toString().trim();
 
   const rowIndex = rows.findIndex((row) => {
     const [room, date, startTime, endTime, pic] = row.map((cell) =>
@@ -84,11 +102,27 @@ export async function deleteBookingFromSheet(bookingData: {
   });
 
   if (rowIndex === -1) {
-    console.log("⚠️ Data booking tidak ditemukan di Google Sheets:", bookingData);
+    console.log(
+      `⚠️ Data booking tidak ditemukan di sheet "${sheetName}":`,
+      bookingData
+    );
     return;
   }
 
-  // Hapus baris di Sheets
+  // 🔹 Cari sheetId berdasarkan nama sheet
+  const sheetInfo = await sheets.spreadsheets.get({
+    spreadsheetId: SPREADSHEET_ID,
+  });
+
+  const sheetMeta = sheetInfo.data.sheets?.find(
+    (s) => s.properties?.title === sheetName
+  );
+
+  if (!sheetMeta?.properties?.sheetId) {
+    console.error(`❌ Sheet "${sheetName}" tidak ditemukan`);
+    return;
+  }
+
   await sheets.spreadsheets.batchUpdate({
     spreadsheetId: SPREADSHEET_ID,
     requestBody: {
@@ -96,7 +130,7 @@ export async function deleteBookingFromSheet(bookingData: {
         {
           deleteDimension: {
             range: {
-              sheetId: 0, // biasanya sheet pertama = ID 0
+              sheetId: sheetMeta.properties.sheetId,
               dimension: "ROWS",
               startIndex: rowIndex,
               endIndex: rowIndex + 1,
@@ -107,5 +141,5 @@ export async function deleteBookingFromSheet(bookingData: {
     },
   });
 
-  console.log("🗑️ Data booking berhasil dihapus dari Google Sheets");
+  console.log(`🗑️ Data booking dihapus dari sheet "${sheetName}"`);
 }

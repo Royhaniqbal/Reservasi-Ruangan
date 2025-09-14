@@ -8,10 +8,9 @@ import Login from "./components/Login";
 import Register from "./components/Register";
 
 import {
-  Home,
   CalendarCheck,
   List, 
-  Settings,
+  User,
 } from 'lucide-react';
 
 interface User {
@@ -21,27 +20,25 @@ interface User {
 }
 
 function App() {
-  const [tab, setTab] = useState('rooms');
-  const [history, setHistory] = useState<any[]>([]); // 🔹 simpan riwayat booking
+  const [tab, setTab] = useState('book'); // 👈 default langsung ke "Pinjam Ruangan"
+  const [history, setHistory] = useState<any[]>([]); 
   const [user, setUser] = useState<User | null>(null);
   const [authPage, setAuthPage] = useState<"login" | "register">("login");
 
   const renderTab = () => {
     switch (tab) {
-      case 'rooms': 
-        return <HomeTab />;
       case 'book': 
         return <BookingTab setHistory={setHistory} />;
       case 'booklist': 
-        return <ListTab history={history} setHistory={setHistory} />; {/* ✅ diperbaiki */}
+        return <ListTab history={history} setHistory={setHistory} />;
       case 'manage': 
         return <ManageTab />;
       default: 
-        return <HomeTab />;
+        return <BookingTab setHistory={setHistory} />; // 👈 fallback ke "Pinjam Ruangan"
     }
   };
 
-    // 🔑 If not logged in → show login page
+  // 🔑 If not logged in → show login/register page
   if (!user) {
     return authPage === "login" ? (
       <Login
@@ -70,16 +67,6 @@ function App() {
         {/* Navigation bar kanan */}
         <div className="flex space-x-14 text-sm">
           <button
-            onClick={() => setTab('rooms')}
-            className={`flex flex-col items-center justify-center min-w-[185px] px-4 py-2 rounded-lg border ${
-              tab === 'rooms' ? 'bg-blue-600 text-white' : 'bg-white text-black hover:bg-gray-100'
-            }`}
-          >
-            <Home size={20} />
-            <span>BERANDA</span>
-          </button>
-
-          <button
             onClick={() => setTab('book')}
             className={`flex flex-col items-center justify-center min-w-[185px] px-4 py-2 rounded-lg border ${
               tab === 'book' ? 'bg-blue-600 text-white' : 'bg-white text-black hover:bg-gray-100'
@@ -105,7 +92,7 @@ function App() {
               tab === 'manage' ? 'bg-blue-600 text-white' : 'bg-white text-black hover:bg-gray-100'
             }`}
           >
-            <Settings size={20} />
+            <User size={20} />
             <span>AKUN</span>
           </button>
         </div>

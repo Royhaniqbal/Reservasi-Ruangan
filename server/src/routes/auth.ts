@@ -10,7 +10,7 @@ const SECRET = process.env.JWT_SECRET || 'your_secret_key';
 // Register
 router.post('/register', async (req: Request, res: Response) => {
   try {
-    console.log('Incoming register body:', req.body);
+    // console.log('Incoming register body:', req.body);
     const { username, email, password, role } = req.body;
 
     // Check if email already exists
