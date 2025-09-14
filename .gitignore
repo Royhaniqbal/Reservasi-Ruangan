@@ -1,13 +1,3 @@
-# Sensitive files
+# Ignore credentials
 server/google-credentials.json
-
-# Node modules
-node_modules/
-
-# Environment files
-.env
-
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+server/.env
