@@ -1,3 +1,2 @@
 # Ignore credentials
 server/google-credentials.json
-server/.env

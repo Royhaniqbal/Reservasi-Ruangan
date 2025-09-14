@@ -2,7 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { Eye, EyeOff } from "lucide-react"; // 👈 import ikon
 
-const API = import.meta.env.VITE_API_BASE_URL;
+// const API = import.meta.env.VITE_API_BASE_URL;
 
 interface RegisterProps {
   onRegister: (user: any, token: string) => void;
