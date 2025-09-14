@@ -1,4 +1,4 @@
-# Ignore Google credentials
+# Sensitive files
 server/google-credentials.json
 
 # Node modules
