@@ -6,7 +6,6 @@ import { LogOut } from "lucide-react";
 const API = import.meta.env.VITE_API_BASE_URL;
 
 export default function ManageTab() {
-  const [user, setUser] = useState<any>(null);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
 
@@ -28,10 +27,9 @@ export default function ManageTab() {
 
         console.log("✅ User fetched:", res.data);
 
-        // Pastikan tipe data dires.data
+        // Ambil data user
         const fetchedUser = (res.data as any).user || res.data;
 
-        setUser(fetchedUser);
         setUsername(fetchedUser.username || "");
         setEmail(fetchedUser.email || "");
       } catch (err: any) {
