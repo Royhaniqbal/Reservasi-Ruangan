@@ -14,7 +14,7 @@ import User from "./models/User";
 import { sendWhatsAppMessage } from "./sendWhatsAppMessage"; // ✅ Import WA helper
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 const SECRET = process.env.JWT_SECRET || "your_secret_key";
 
 app.use(cors());
