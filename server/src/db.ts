@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const MONGO_URI = "mongodb://127.0.0.1:27017/booking_ruangan"; 
+const MONGO_URI = "mongodb+srv://royhaniqbal:<mRi140597>@sipamancluster.na6ztxj.mongodb.net/?retryWrites=true&w=majority&appName=SipamanCluster"; 
 // 👉 ganti kalau pakai Mongo Atlas
 
 export async function connectDB() {
