@@ -14,12 +14,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.connectDB = connectDB;
 const mongoose_1 = __importDefault(require("mongoose"));
-const MONGO_URI = "mongodb://127.0.0.1:27017/booking_ruangan";
+// const MONGO_URI = "mongodb://127.0.0.1:27017/booking_ruangan"; 
 // 👉 ganti kalau pakai Mongo Atlas
 function connectDB() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            yield mongoose_1.default.connect(MONGO_URI);
+            yield mongoose_1.default.connect(process.env.MONGO_URI || "");
             console.log("✅ MongoDB connected");
         }
         catch (err) {
