@@ -2,7 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { Eye, EyeOff } from "lucide-react"; // 👈 ikon mata
 
-// const API = import.meta.env.VITE_API_BASE_URL;
+const API = import.meta.env.VITE_API_BASE_URL;
 
 interface LoginProps {
   onLogin: (user: any, token: string) => void;
@@ -18,11 +18,16 @@ export default function Login({ onLogin, onSwitchToRegister }: LoginProps) {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`http://localhost:5000/api/auth/login`, { email, password });
+      const res = await axios.post(`${API}/api/auth/login`, {
+        email,
+        password,
+      });
       const data = res.data as { user: any; token: string };
       localStorage.setItem("token", data.token);
       onLogin(data.user, data.token);
-    } catch (err) {
+    }
+
+    catch (err) {
       setError("E-mail atau password salah ❌");
     }
   };

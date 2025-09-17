@@ -2,7 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { Eye, EyeOff } from "lucide-react"; // 👈 import ikon
 
-// const API = import.meta.env.VITE_API_BASE_URL;
+const API = import.meta.env.VITE_API_BASE_URL;
 
 interface RegisterProps {
   onRegister: (user: any, token: string) => void;
@@ -21,7 +21,7 @@ export default function Register({ onRegister, onSwitchToLogin }: RegisterProps)
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`http://localhost:5000/api/auth/register`, {
+      const res = await axios.post(`${API}/api/auth/register`, {
         username,
         email,
         password,
@@ -33,7 +33,9 @@ export default function Register({ onRegister, onSwitchToLogin }: RegisterProps)
       onRegister(data.user, data.token);
 
       setError("");
-    } catch (err) {
+    }
+
+    catch (err) {
       setSuccess("");
       setError("Pendaftaran gagal ❌. Coba gunakan email lain.");
     }
