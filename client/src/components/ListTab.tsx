@@ -25,9 +25,10 @@ export default function ListTab({ history, setHistory }: ListTabProps) {
       if (!token) return;
 
       try {
-        const res = await fetch("http://localhost:5000/api/my-bookings", {
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/my-bookings`, {
           headers: { Authorization: `Bearer ${token}` },
         });
+
 
         if (!res.ok) throw new Error("Gagal fetch riwayat booking");
 
@@ -59,11 +60,12 @@ export default function ListTab({ history, setHistory }: ListTabProps) {
     if (!confirmCancel) return;
 
     try {
-      const res = await fetch("http://localhost:5000/api/cancel-booking", {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/cancel-booking`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(booking),
       });
+
 
       const data = await res.json();
 
