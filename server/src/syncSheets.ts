@@ -3,9 +3,10 @@ import { google } from "googleapis";
 import fs from "fs";
 
 const SCOPES = ["https://www.googleapis.com/auth/spreadsheets"];
-const CREDENTIALS = JSON.parse(
-  fs.readFileSync("google-credentials.json", "utf-8")
-);
+if (!process.env.GOOGLE_CREDENTIALS) {
+  throw new Error("GOOGLE_CREDENTIALS environment variable is not set");
+}
+const CREDENTIALS = JSON.parse(process.env.GOOGLE_CREDENTIALS);
 
 const auth = new google.auth.GoogleAuth({
   credentials: CREDENTIALS,
