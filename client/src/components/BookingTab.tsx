@@ -73,114 +73,63 @@ export default function BookingTab({
   }, [editingBooking]);
 
   // 🔹 Fetch availability
-  // code lama :
-  // useEffect(() => {
-  //   const fetchAvailability = async () => {
-  //     if (bookingData.room && bookingData.date) {
-  //       try {
-  //         const res = await fetch(`${API}/api/check-availability`, {
-  //           method: "POST",
-  //           headers: { "Content-Type": "application/json" },
-  //           body: JSON.stringify({ room: bookingData.room, date: bookingData.date }),
-  //         });
-  //         if (!res.ok) {
-  //           setAvailability([]);
-  //           return;
-  //         }
-  //         const data = await res.json();
-  //         setAvailability(Array.isArray(data.available) ? data.available : []);
-  //       } catch {
-  //         setAvailability([]);
-  //       }
-  //     } else {
-  //       setAvailability([]);
-  //     }
-  //   };
-  //   fetchAvailability();
-  // }, [bookingData.room, bookingData.date]);
-  // 🔹 Fetch availability
-// 🔹 Fetch availability (sertakan slot user sendiri saat edit)
-useEffect(() => {
-  const fetchAvailability = async () => {
-    if (bookingData.room && bookingData.date) {
-      try {
-        const res = await fetch(`${API}/api/check-availability`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ room: bookingData.room, date: bookingData.date }),
-        });
-
-        if (!res.ok) {
-          setAvailability([]);
-          return;
-        }
-
-        let slots: AvailabilitySlot[] = [];
-        const data = await res.json();
-        if (Array.isArray(data.available)) {
-          slots = data.available as AvailabilitySlot[];
-        }
-
-        // 👉 kalau sedang edit, tambahkan slot waktu booking lama user
-        if (editingBooking) {
-          slots.push({
-            startTime: editingBooking.startTime,
-            endTime: editingBooking.endTime,
+  useEffect(() => {
+    const fetchAvailability = async () => {
+      if (bookingData.room && bookingData.date) {
+        try {
+          const res = await fetch(`${API}/api/check-availability`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ room: bookingData.room, date: bookingData.date }),
           });
+
+          if (!res.ok) {
+            setAvailability([]);
+            return;
+          }
+
+          let slots: AvailabilitySlot[] = [];
+          const data = await res.json();
+          if (Array.isArray(data.available)) {
+            slots = data.available as AvailabilitySlot[];
+          }
+
+          // 👉 kalau sedang edit, tambahkan slot waktu booking lama user
+          if (editingBooking) {
+            slots.push({
+              startTime: editingBooking.startTime,
+              endTime: editingBooking.endTime,
+            });
+          }
+
+          // Urutkan biar rapi
+          slots.sort((a: AvailabilitySlot, b: AvailabilitySlot) =>
+            a.startTime.localeCompare(b.startTime)
+          );
+
+          setAvailability(slots);
+        } catch (err) {
+          console.error("❌ Error fetch availability:", err);
+          setAvailability([]);
         }
-
-        // Urutkan biar rapi
-        slots.sort((a: AvailabilitySlot, b: AvailabilitySlot) =>
-          a.startTime.localeCompare(b.startTime)
-        );
-
-        setAvailability(slots);
-      } catch (err) {
-        console.error("❌ Error fetch availability:", err);
+      } else {
         setAvailability([]);
       }
-    } else {
-      setAvailability([]);
-    }
-  };
+    };
 
-  fetchAvailability();
-}, [bookingData.room, bookingData.date, editingBooking]);
-
-
+    fetchAvailability();
+  }, [bookingData.room, bookingData.date, editingBooking]);
 
   // 🔹 Generate opsi jam (30 menit)
-  // code lama
-  // const generateTimeOptions = () => {
-  //   if (!availability.length) return [];
-  //   const options: string[] = [];
-  //   availability.forEach((slot) => {
-  //     const [startH, startM] = slot.startTime.split(":").map(Number);
-  //     const [endH, endM] = slot.endTime.split(":").map(Number);
-  //     let current = startH * 60 + startM;
-  //     const end = endH * 60 + endM;
-  //     while (current < end) {
-  //       const h = String(Math.floor(current / 60)).padStart(2, "0");
-  //       const m = String(current % 60).padStart(2, "0");
-  //       options.push(`${h}:${m}`);
-  //       current += 30;
-  //     }
-  //   });
-  //   return options;
-  // };
-  // 🔹 Generate opsi jam (30 menit) termasuk endTime slot
   const generateTimeOptions = () => {
     if (!availability.length) return [];
     const options: string[] = [];
-
-    availability.forEach((slot: AvailabilitySlot) => {
+    availability.forEach((slot) => {
       const [startH, startM] = slot.startTime.split(":").map(Number);
       const [endH, endM] = slot.endTime.split(":").map(Number);
-
       let current = startH * 60 + startM;
       const end = endH * 60 + endM;
-
-      while (current <= end) { // ⬅️ pakai <= supaya endTime juga ikut
+      while (current < end) {
         const h = String(Math.floor(current / 60)).padStart(2, "0");
         const m = String(current % 60).padStart(2, "0");
         options.push(`${h}:${m}`);
@@ -192,63 +141,87 @@ useEffect(() => {
   const timeOptions = generateTimeOptions();
 
   // 🔹 Simpan / update booking
-  const handleSubmit = async () => {
-    if (!bookingData.room || !bookingData.date || !bookingData.startTime || !bookingData.endTime || !bookingData.pic) {
-      toast.error("⚠️ Mohon lengkapi semua data!", {
-        style: { background: "#fee2e2", color: "#b91c1c", fontWeight: "600" },
-      });
-      return;
+const handleSubmit = async () => {
+  if (
+    !bookingData.room ||
+    !bookingData.date ||
+    !bookingData.startTime ||
+    !bookingData.endTime ||
+    !bookingData.pic
+  ) {
+    toast.error("⚠️ Mohon lengkapi semua data!", {
+      style: { background: "#fee2e2", color: "#b91c1c", fontWeight: "600" },
+    });
+    return;
+  }
+
+  // 👉 Validasi: endTime harus lebih besar dari startTime
+  const startMinutes =
+    parseInt(bookingData.startTime.split(":")[0]) * 60 +
+    parseInt(bookingData.startTime.split(":")[1]);
+  const endMinutes =
+    parseInt(bookingData.endTime.split(":")[0]) * 60 +
+    parseInt(bookingData.endTime.split(":")[1]);
+
+  if (endMinutes <= startMinutes) {
+    toast.error("⚠️ Jam selesai harus lebih besar dari jam mulai!", {
+      style: { background: "#fee2e2", color: "#b91c1c", fontWeight: "600" },
+    });
+    return;
+  }
+
+  try {
+    const endpoint = editingBooking
+      ? `${API}/api/book/${bookingData._id}`
+      : `${API}/api/book`;
+    const method = editingBooking ? "PUT" : "POST";
+
+    const res = await fetch(endpoint, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(bookingData),
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || data?.success === false) {
+      throw new Error(data.message || "Gagal simpan booking");
     }
 
-    try {
-      const endpoint = editingBooking ? `${API}/api/book/${bookingData._id}` : `${API}/api/book`;
-      const method = editingBooking ? "PUT" : "POST";
+    const updatedBooking = {
+      _id: data._id || bookingData._id,
+      room: data.room || bookingData.room,
+      date: data.date || bookingData.date,
+      startTime: data.startTime || bookingData.startTime,
+      endTime: data.endTime || bookingData.endTime,
+      pic: data.pic || bookingData.pic,
+    };
 
-      const res = await fetch(endpoint, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(bookingData),
+    if (editingBooking && onFinishEdit) {
+      onFinishEdit(updatedBooking);
+      toast.success("✅ Booking berhasil diperbarui!", {
+        style: { background: "#dbeafe", color: "#1e3a8a", fontWeight: "600" },
+      });
+    } else {
+      setHistory((prev) => [...prev, updatedBooking]);
+      toast.success("✅ Booking baru berhasil disimpan!", {
+        style: { background: "#dbeafe", color: "#1e3a8a", fontWeight: "600" },
       });
 
-      const data = await res.json().catch(() => ({}));
-
-      if (!res.ok || data?.success === false) {
-        throw new Error(data.message || "Gagal simpan booking");
-      }
-
-      const updatedBooking = {
-        _id: data._id || bookingData._id,
-        room: data.room || bookingData.room,
-        date: data.date || bookingData.date,
-        startTime: data.startTime || bookingData.startTime,
-        endTime: data.endTime || bookingData.endTime,
-        pic: data.pic || bookingData.pic,
-      };
-
-      if (editingBooking && onFinishEdit) {
-        onFinishEdit(updatedBooking);
-        toast.success("✅ Booking berhasil diperbarui!", {
-          style: { background: "#dbeafe", color: "#1e3a8a", fontWeight: "600" },
-        });
-      } else {
-        setHistory((prev) => [...prev, updatedBooking]);
-        toast.success("✅ Booking baru berhasil disimpan!", {
-          style: { background: "#dbeafe", color: "#1e3a8a", fontWeight: "600" },
-        });
-
-        // reset form
-        setSelected(null);
-        setSelectedDate("");
-        setTimeStart("");
-        setTimeEnd("");
-      }
-    } catch (err: any) {
-      console.error("Submit error:", err);
-      toast.error(`❌ Error: ${err.message || ""}`, {
-        style: { background: "#fee2e2", color: "#b91c1c", fontWeight: "600" },
-      });
+      // reset form
+      setSelected(null);
+      setSelectedDate("");
+      setTimeStart("");
+      setTimeEnd("");
     }
-  };
+  } catch (err: any) {
+    console.error("Submit error:", err);
+    toast.error(`❌ Error: ${err.message || ""}`, {
+      style: { background: "#fee2e2", color: "#b91c1c", fontWeight: "600" },
+    });
+  }
+};
+
 
   return (
     <div className="min-h-screen text-black font-bold bg-white pt-0 px-0">
