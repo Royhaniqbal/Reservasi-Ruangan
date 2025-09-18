@@ -73,30 +73,80 @@ export default function BookingTab({
   }, [editingBooking]);
 
   // 🔹 Fetch availability
-  useEffect(() => {
-    const fetchAvailability = async () => {
-      if (bookingData.room && bookingData.date) {
-        try {
-          const res = await fetch(`${API}/api/check-availability`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ room: bookingData.room, date: bookingData.date }),
-          });
-          if (!res.ok) {
-            setAvailability([]);
-            return;
-          }
-          const data = await res.json();
-          setAvailability(Array.isArray(data.available) ? data.available : []);
-        } catch {
+  // useEffect(() => {
+  //   const fetchAvailability = async () => {
+  //     if (bookingData.room && bookingData.date) {
+  //       try {
+  //         const res = await fetch(`${API}/api/check-availability`, {
+  //           method: "POST",
+  //           headers: { "Content-Type": "application/json" },
+  //           body: JSON.stringify({ room: bookingData.room, date: bookingData.date }),
+  //         });
+  //         if (!res.ok) {
+  //           setAvailability([]);
+  //           return;
+  //         }
+  //         const data = await res.json();
+  //         setAvailability(Array.isArray(data.available) ? data.available : []);
+  //       } catch {
+  //         setAvailability([]);
+  //       }
+  //     } else {
+  //       setAvailability([]);
+  //     }
+  //   };
+  //   fetchAvailability();
+  // }, [bookingData.room, bookingData.date]);
+  // 🔹 Fetch availability
+// 🔹 Fetch availability (sertakan slot user sendiri saat edit)
+useEffect(() => {
+  const fetchAvailability = async () => {
+    if (bookingData.room && bookingData.date) {
+      try {
+        const res = await fetch(`${API}/api/check-availability`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ room: bookingData.room, date: bookingData.date }),
+        });
+
+        if (!res.ok) {
           setAvailability([]);
+          return;
         }
-      } else {
+
+        let slots: AvailabilitySlot[] = [];
+        const data = await res.json();
+        if (Array.isArray(data.available)) {
+          slots = data.available as AvailabilitySlot[];
+        }
+
+        // 👉 kalau sedang edit, tambahkan slot waktu booking lama user
+        if (editingBooking) {
+          slots.push({
+            startTime: editingBooking.startTime,
+            endTime: editingBooking.endTime,
+          });
+        }
+
+        // Urutkan biar rapi
+        slots.sort((a: AvailabilitySlot, b: AvailabilitySlot) =>
+          a.startTime.localeCompare(b.startTime)
+        );
+
+        setAvailability(slots);
+      } catch (err) {
+        console.error("❌ Error fetch availability:", err);
         setAvailability([]);
       }
-    };
-    fetchAvailability();
-  }, [bookingData.room, bookingData.date]);
+    } else {
+      setAvailability([]);
+    }
+  };
+
+  fetchAvailability();
+}, [bookingData.room, bookingData.date, editingBooking]);
+
+
 
   // 🔹 Generate opsi jam (30 menit)
   const generateTimeOptions = () => {
