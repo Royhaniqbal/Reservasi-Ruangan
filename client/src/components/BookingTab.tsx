@@ -150,15 +150,37 @@ useEffect(() => {
 
 
   // 🔹 Generate opsi jam (30 menit)
+  // code lama
+  // const generateTimeOptions = () => {
+  //   if (!availability.length) return [];
+  //   const options: string[] = [];
+  //   availability.forEach((slot) => {
+  //     const [startH, startM] = slot.startTime.split(":").map(Number);
+  //     const [endH, endM] = slot.endTime.split(":").map(Number);
+  //     let current = startH * 60 + startM;
+  //     const end = endH * 60 + endM;
+  //     while (current < end) {
+  //       const h = String(Math.floor(current / 60)).padStart(2, "0");
+  //       const m = String(current % 60).padStart(2, "0");
+  //       options.push(`${h}:${m}`);
+  //       current += 30;
+  //     }
+  //   });
+  //   return options;
+  // };
+  // 🔹 Generate opsi jam (30 menit) termasuk endTime slot
   const generateTimeOptions = () => {
     if (!availability.length) return [];
     const options: string[] = [];
-    availability.forEach((slot) => {
+
+    availability.forEach((slot: AvailabilitySlot) => {
       const [startH, startM] = slot.startTime.split(":").map(Number);
       const [endH, endM] = slot.endTime.split(":").map(Number);
+
       let current = startH * 60 + startM;
       const end = endH * 60 + endM;
-      while (current < end) {
+
+      while (current <= end) { // ⬅️ pakai <= supaya endTime juga ikut
         const h = String(Math.floor(current / 60)).padStart(2, "0");
         const m = String(current % 60).padStart(2, "0");
         options.push(`${h}:${m}`);
