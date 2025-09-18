@@ -22,7 +22,7 @@ export default function BookingTab({
   const [timeEnd, setTimeEnd] = useState<string>("");
   const [pic, setPic] = useState<string>("");
 
-  const rooms = [
+  const rooms: { id: number; name: string; capacity: string; img: string }[] = [
     { id: 1, name: "Ruang Rapat Dirjen", capacity: "24 orang", img: "/gambarsatu.jpg" },
     { id: 2, name: "Ruang Rapat Sesditjen", capacity: "10 orang", img: "/gambardua.jpeg" },
     { id: 3, name: "Command Center", capacity: "12 orang", img: "/gambarempat.jpg" },
@@ -40,7 +40,22 @@ export default function BookingTab({
     pic: pic || null,
   };
 
-  // 🔹 Ambil user (PIC)
+  // ----------------------
+  // Helpers time
+  // ----------------------
+  const parseToMinutes = (t: string) => {
+    const [hh, mm] = t.split(":").map(Number);
+    return hh * 60 + mm;
+  };
+  const formatFromMinutes = (m: number) => {
+    const hh = Math.floor(m / 60).toString().padStart(2, "0");
+    const mm = (m % 60).toString().padStart(2, "0");
+    return `${hh}:${mm}`;
+  };
+
+  // ----------------------
+  // Ambil user (PIC)
+  // ----------------------
   useEffect(() => {
     const fetchUser = async () => {
       const token = localStorage.getItem("token");
@@ -60,7 +75,9 @@ export default function BookingTab({
     fetchUser();
   }, []);
 
-  // 🔹 Isi form kalau sedang edit
+  // ----------------------
+  // Isi form kalau sedang edit
+  // ----------------------
   useEffect(() => {
     if (editingBooking) {
       const room = rooms.find((r) => r.name === editingBooking.room);
@@ -72,7 +89,9 @@ export default function BookingTab({
     }
   }, [editingBooking]);
 
-  // 🔹 Fetch availability
+  // ----------------------
+  // Fetch availability
+  // ----------------------
   useEffect(() => {
     const fetchAvailability = async () => {
       if (bookingData.room && bookingData.date) {
@@ -95,7 +114,7 @@ export default function BookingTab({
           }
 
           // 👉 kalau sedang edit, tambahkan slot waktu booking lama user
-          if (editingBooking) {
+          if (editingBooking && editingBooking.startTime && editingBooking.endTime) {
             slots.push({
               startTime: editingBooking.startTime,
               endTime: editingBooking.endTime,
@@ -103,9 +122,7 @@ export default function BookingTab({
           }
 
           // Urutkan biar rapi
-          slots.sort((a: AvailabilitySlot, b: AvailabilitySlot) =>
-            a.startTime.localeCompare(b.startTime)
-          );
+          slots.sort((a: AvailabilitySlot, b: AvailabilitySlot) => a.startTime.localeCompare(b.startTime));
 
           setAvailability(slots);
         } catch (err) {
@@ -120,108 +137,149 @@ export default function BookingTab({
     fetchAvailability();
   }, [bookingData.room, bookingData.date, editingBooking]);
 
-  // 🔹 Generate opsi jam (30 menit)
-  const generateTimeOptions = () => {
+  // ----------------------
+  // Generate opsi start / end
+  // ----------------------
+  const generateStartOptions = (): string[] => {
     if (!availability.length) return [];
     const options: string[] = [];
-    availability.forEach((slot) => {
-      const [startH, startM] = slot.startTime.split(":").map(Number);
-      const [endH, endM] = slot.endTime.split(":").map(Number);
-      let current = startH * 60 + startM;
-      const end = endH * 60 + endM;
+    availability.forEach((slot: AvailabilitySlot) => {
+      const start = parseToMinutes(slot.startTime);
+      const end = parseToMinutes(slot.endTime);
+      let current = start;
+      // start options: include start times but stop before end (so start < end)
       while (current < end) {
-        const h = String(Math.floor(current / 60)).padStart(2, "0");
-        const m = String(current % 60).padStart(2, "0");
-        options.push(`${h}:${m}`);
+        options.push(formatFromMinutes(current));
         current += 30;
       }
     });
-    return options;
+    // unique + sorted
+    return Array.from(new Set(options)).sort();
   };
-  const timeOptions = generateTimeOptions();
 
-  // 🔹 Simpan / update booking
-const handleSubmit = async () => {
-  if (
-    !bookingData.room ||
-    !bookingData.date ||
-    !bookingData.startTime ||
-    !bookingData.endTime ||
-    !bookingData.pic
-  ) {
-    toast.error("⚠️ Mohon lengkapi semua data!", {
-      style: { background: "#fee2e2", color: "#b91c1c", fontWeight: "600" },
-    });
-    return;
-  }
+  const generateEndOptions = (): string[] => {
+    if (!timeStart || !availability.length) return [];
+    const options: string[] = [];
 
-  // 👉 Validasi: endTime harus lebih besar dari startTime
-  const startMinutes =
-    parseInt(bookingData.startTime.split(":")[0]) * 60 +
-    parseInt(bookingData.startTime.split(":")[1]);
-  const endMinutes =
-    parseInt(bookingData.endTime.split(":")[0]) * 60 +
-    parseInt(bookingData.endTime.split(":")[1]);
+    const startMin = parseToMinutes(timeStart);
 
-  if (endMinutes <= startMinutes) {
-    toast.error("⚠️ Jam selesai harus lebih besar dari jam mulai!", {
-      style: { background: "#fee2e2", color: "#b91c1c", fontWeight: "600" },
-    });
-    return;
-  }
-
-  try {
-    const endpoint = editingBooking
-      ? `${API}/api/book/${bookingData._id}`
-      : `${API}/api/book`;
-    const method = editingBooking ? "PUT" : "POST";
-
-    const res = await fetch(endpoint, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(bookingData),
+    // cari slot yang mengandung timeStart
+    const slot = availability.find((s: AvailabilitySlot) => {
+      const sStart = parseToMinutes(s.startTime);
+      const sEnd = parseToMinutes(s.endTime);
+      return startMin >= sStart && startMin < sEnd;
     });
 
-    const data = await res.json().catch(() => ({}));
+    if (!slot) return [];
 
-    if (!res.ok || data?.success === false) {
-      throw new Error(data.message || "Gagal simpan booking");
+    const slotEndMin = parseToMinutes(slot.endTime);
+
+    // end options mulai dari minimal 30 menit setelah start sampai slotEnd (termasuk slotEnd)
+    let current = startMin + 30;
+    while (current <= slotEndMin) {
+      options.push(formatFromMinutes(current));
+      current += 30;
     }
 
-    const updatedBooking = {
-      _id: data._id || bookingData._id,
-      room: data.room || bookingData.room,
-      date: data.date || bookingData.date,
-      startTime: data.startTime || bookingData.startTime,
-      endTime: data.endTime || bookingData.endTime,
-      pic: data.pic || bookingData.pic,
-    };
+    return options;
+  };
 
-    if (editingBooking && onFinishEdit) {
-      onFinishEdit(updatedBooking);
-      toast.success("✅ Booking berhasil diperbarui!", {
-        style: { background: "#dbeafe", color: "#1e3a8a", fontWeight: "600" },
-      });
-    } else {
-      setHistory((prev) => [...prev, updatedBooking]);
-      toast.success("✅ Booking baru berhasil disimpan!", {
-        style: { background: "#dbeafe", color: "#1e3a8a", fontWeight: "600" },
-      });
-
-      // reset form
-      setSelected(null);
-      setSelectedDate("");
+  // Jika availability berubah dan timeStart tidak valid lagi → reset start & end
+  useEffect(() => {
+    const starts = generateStartOptions();
+    if (timeStart && !starts.includes(timeStart)) {
       setTimeStart("");
       setTimeEnd("");
     }
-  } catch (err: any) {
-    console.error("Submit error:", err);
-    toast.error(`❌ Error: ${err.message || ""}`, {
-      style: { background: "#fee2e2", color: "#b91c1c", fontWeight: "600" },
-    });
-  }
-};
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [availability]);
 
+  // Jika user ganti start yang membuat timeEnd menjadi invalid → reset end
+  useEffect(() => {
+    if (!timeStart) return;
+    const ends = generateEndOptions();
+    if (timeEnd && !ends.includes(timeEnd)) {
+      setTimeEnd("");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeStart, availability]);
+
+  // ----------------------
+  // Simpan / update booking (dengan validasi end > start)
+  // ----------------------
+  const handleSubmit = async () => {
+    if (!bookingData.room || !bookingData.date || !bookingData.startTime || !bookingData.endTime || !bookingData.pic) {
+      toast.error("⚠️ Mohon lengkapi semua data!", {
+        style: { background: "#fee2e2", color: "#b91c1c", fontWeight: "600" },
+      });
+      return;
+    }
+
+    // Validasi: endTime harus lebih besar dari startTime
+    const startMinutes = parseToMinutes(bookingData.startTime);
+    const endMinutes = parseToMinutes(bookingData.endTime);
+    if (endMinutes <= startMinutes) {
+      toast.error("⚠️ Jam selesai harus lebih besar dari jam mulai!", {
+        style: { background: "#fee2e2", color: "#b91c1c", fontWeight: "600" },
+      });
+      return;
+    }
+
+    try {
+      const endpoint = editingBooking ? `${API}/api/book/${bookingData._id}` : `${API}/api/book`;
+      const method = editingBooking ? "PUT" : "POST";
+
+      const res = await fetch(endpoint, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(bookingData),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok || data?.success === false) {
+        throw new Error(data.message || "Gagal simpan booking");
+      }
+
+      const updatedBooking = {
+        _id: data._id || bookingData._id,
+        room: data.room || bookingData.room,
+        date: data.date || bookingData.date,
+        startTime: data.startTime || bookingData.startTime,
+        endTime: data.endTime || bookingData.endTime,
+        pic: data.pic || bookingData.pic,
+      };
+
+      if (editingBooking && onFinishEdit) {
+        onFinishEdit(updatedBooking);
+        toast.success("✅ Booking berhasil diperbarui!", {
+          style: { background: "#dbeafe", color: "#1e3a8a", fontWeight: "600" },
+        });
+      } else {
+        setHistory((prev) => [...prev, updatedBooking]);
+        toast.success("✅ Booking baru berhasil disimpan!", {
+          style: { background: "#dbeafe", color: "#1e3a8a", fontWeight: "600" },
+        });
+
+        // reset form
+        setSelected(null);
+        setSelectedDate("");
+        setTimeStart("");
+        setTimeEnd("");
+      }
+    } catch (err: any) {
+      console.error("Submit error:", err);
+      toast.error(`❌ Error: ${err.message || ""}`, {
+        style: { background: "#fee2e2", color: "#b91c1c", fontWeight: "600" },
+      });
+    }
+  };
+
+  // ----------------------
+  // JSX
+  // ----------------------
+  const startOptions = generateStartOptions();
+  const endOptions = generateEndOptions();
 
   return (
     <div className="min-h-screen text-black font-bold bg-white pt-0 px-0">
@@ -269,7 +327,7 @@ const handleSubmit = async () => {
             <div className="w-full border rounded-lg px-3 py-2 bg-gray-100 text-gray-700 font-normal min-h-[50px]">
               {availability.length > 0 ? (
                 <ul className="list-disc list-inside text-sm">
-                  {availability.map((slot, idx) => (
+                  {availability.map((slot: AvailabilitySlot, idx: number) => (
                     <li key={idx}>
                       {slot.startTime} - {slot.endTime}
                     </li>
@@ -289,11 +347,14 @@ const handleSubmit = async () => {
             <div className="flex items-center gap-2">
               <select
                 value={timeStart}
-                onChange={(e) => setTimeStart(e.target.value)}
+                onChange={(e) => {
+                  setTimeStart(e.target.value);
+                  setTimeEnd(""); // reset end saat ganti start
+                }}
                 className="w-1/2 border rounded-lg px-3 py-2 font-normal"
               >
                 <option value="">Pilih</option>
-                {timeOptions.map((t) => (
+                {startOptions.map((t: string) => (
                   <option key={t} value={t}>
                     {t}
                   </option>
@@ -304,9 +365,10 @@ const handleSubmit = async () => {
                 value={timeEnd}
                 onChange={(e) => setTimeEnd(e.target.value)}
                 className="w-1/2 border rounded-lg px-3 py-2 font-normal"
+                disabled={!timeStart || endOptions.length === 0}
               >
                 <option value="">Pilih</option>
-                {timeOptions.map((t) => (
+                {endOptions.map((t: string) => (
                   <option key={t} value={t}>
                     {t}
                   </option>
