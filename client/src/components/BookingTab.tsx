@@ -73,6 +73,7 @@ export default function BookingTab({
   }, [editingBooking]);
 
   // 🔹 Fetch availability
+  // code lama :
   // useEffect(() => {
   //   const fetchAvailability = async () => {
   //     if (bookingData.room && bookingData.date) {

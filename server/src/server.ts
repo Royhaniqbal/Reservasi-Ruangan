@@ -34,7 +34,7 @@ app.post("/api/check-availability", async (req: Request, res: Response) => {
   }
 
   const roomBookings = await Booking.find({ room, date });
-  const WORKING_HOURS = [{ startTime: "07:30", endTime: "17:00" }];
+  const WORKING_HOURS = [{ startTime: "07:30", endTime: "16:30" }];
 
   let availableSlots = [...WORKING_HOURS];
 
