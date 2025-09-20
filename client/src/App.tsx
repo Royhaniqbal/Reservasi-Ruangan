@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import './App.css'
 import BookingTab from './components/BookingTab';
-// import HomeTab from './components/HomeTab';
 import ListTab from './components/ListTab';
 import ManageTab from './components/ManageTab';
 import Login from "./components/Login";
@@ -9,7 +8,7 @@ import Register from "./components/Register";
 
 import {
   CalendarCheck,
-  List, 
+  List,
   User,
 } from 'lucide-react';
 
@@ -20,25 +19,24 @@ interface User {
 }
 
 function App() {
-  const [tab, setTab] = useState('book'); // 👈 default langsung ke "Pinjam Ruangan"
-  const [history, setHistory] = useState<any[]>([]); 
+  const [tab, setTab] = useState('book'); 
+  const [history, setHistory] = useState<any[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [authPage, setAuthPage] = useState<"login" | "register">("login");
 
   const renderTab = () => {
     switch (tab) {
-      case 'book': 
+      case 'book':
         return <BookingTab setHistory={setHistory} />;
-      case 'booklist': 
+      case 'booklist':
         return <ListTab history={history} setHistory={setHistory} />;
-      case 'manage': 
+      case 'manage':
         return <ManageTab />;
-      default: 
-        return <BookingTab setHistory={setHistory} />; // 👈 fallback ke "Pinjam Ruangan"
+      default:
+        return <BookingTab setHistory={setHistory} />;
     }
   };
 
-  // 🔑 If not logged in → show login/register page
   if (!user) {
     return authPage === "login" ? (
       <Login
@@ -54,54 +52,80 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-black">
+    <div className="min-h-screen bg-white text-black flex flex-col">
 
-      {/* NAVBAR ATAS */}
-      <div className="fixed top-0 left-0 right-0 bg-white text-black flex items-center justify-between px-4 py-1 shadow z-50">
-        {/* Logo kiri */}
-        <div className="flex items-center space-x-6">
-          <img src="/logokemnaker.png" alt="Logo Kemnaker" className="h-12" />
-          <img src="/logovokasi.png" alt="Logo Vokasi" className="h-5" />
+      {/* NAVBAR ATAS (desktop) */}
+      <div className="hidden sm:flex fixed top-0 left-0 right-0 bg-white text-black items-center justify-between px-4 py-2 shadow z-50">
+        <div className="flex items-center space-x-3">
+          <img src="/logokemnaker.png" alt="Logo Kemnaker" className="h-10 sm:h-12" />
+          <img src="/logovokasi.png" alt="Logo Vokasi" className="h-4 sm:h-5" />
         </div>
 
-        {/* Navigation bar kanan */}
-        <div className="flex space-x-14 text-sm">
+        <div className="flex space-x-6 text-sm">
           <button
             onClick={() => setTab('book')}
-            className={`flex flex-col items-center justify-center min-w-[185px] px-4 py-2 rounded-lg border ${
+            className={`px-4 py-2 rounded-lg border transition active:scale-95 ${
               tab === 'book' ? 'bg-blue-600 text-white' : 'bg-white text-black hover:bg-gray-100'
             }`}
           >
-            <CalendarCheck size={20} />
-            <span>PINJAM RUANGAN</span>
+            Pinjam Ruangan
           </button>
-
           <button
             onClick={() => setTab('booklist')}
-            className={`flex flex-col items-center justify-center min-w-[185px] px-4 py-2 rounded-lg border ${
+            className={`px-4 py-2 rounded-lg border transition active:scale-95 ${
               tab === 'booklist' ? 'bg-blue-600 text-white' : 'bg-white text-black hover:bg-gray-100'
             }`}
           >
-            <List size={20} />
-            <span>RIWAYAT PEMINJAMAN</span>
+            Riwayat Peminjaman
           </button>
-
           <button
             onClick={() => setTab('manage')}
-            className={`flex flex-col items-center justify-center min-w-[185px] px-4 py-2 rounded-lg border ${
+            className={`px-4 py-2 rounded-lg border transition active:scale-95 ${
               tab === 'manage' ? 'bg-blue-600 text-white' : 'bg-white text-black hover:bg-gray-100'
             }`}
           >
-            <User size={20} />
-            <span>AKUN</span>
+            Akun
           </button>
         </div>
       </div>
 
       {/* ISI HALAMAN */}
-      <main className="pt-24 pl-6 w-full">
+      <main className="flex-1 pt-20 sm:pt-24 px-3 sm:px-6 w-full">
         {renderTab()}
       </main>
+
+      {/* NAVBAR BAWAH (mobile) */}
+      <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-white border-t shadow-inner flex justify-around py-2 z-50">
+        <button
+          onClick={() => setTab('book')}
+          className={`flex flex-col items-center transition active:scale-95 ${
+            tab === 'book' ? 'text-blue-600' : 'text-gray-600'
+          }`}
+        >
+          <CalendarCheck size={22} />
+          <span className="text-xs">Pinjam</span>
+        </button>
+
+        <button
+          onClick={() => setTab('booklist')}
+          className={`flex flex-col items-center transition active:scale-95 ${
+            tab === 'booklist' ? 'text-blue-600' : 'text-gray-600'
+          }`}
+        >
+          <List size={22} />
+          <span className="text-xs">Riwayat</span>
+        </button>
+
+        <button
+          onClick={() => setTab('manage')}
+          className={`flex flex-col items-center transition active:scale-95 ${
+            tab === 'manage' ? 'text-blue-600' : 'text-gray-600'
+          }`}
+        >
+          <User size={22} />
+          <span className="text-xs">Akun</span>
+        </button>
+      </div>
     </div>
   )
 }
