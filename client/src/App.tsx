@@ -64,7 +64,7 @@ function App() {
         <div className="flex space-x-14 text-sm">
           <button
             onClick={() => setTab('book')}
-            className={`flex flex-col items-center justify-center min-w-[185px] px-4 py-2 rounded-lg border ${
+            className={`flex flex-col items-center justify-center min-w-[185px] px-4 py-2 rounded-lg border focus:outline-none focus:ring-0 ${
               tab === 'book' ? 'bg-blue-600 text-white' : 'bg-white text-black hover:bg-gray-100'
             }`}
           >
@@ -74,7 +74,7 @@ function App() {
 
           <button
             onClick={() => setTab('booklist')}
-            className={`flex flex-col items-center justify-center min-w-[185px] px-4 py-2 rounded-lg border ${
+            className={`flex flex-col items-center justify-center min-w-[185px] px-4 py-2 rounded-lg border focus:outline-none focus:ring-0 ${
               tab === 'booklist' ? 'bg-blue-600 text-white' : 'bg-white text-black hover:bg-gray-100'
             }`}
           >
@@ -84,7 +84,7 @@ function App() {
 
           <button
             onClick={() => setTab('manage')}
-            className={`flex flex-col items-center justify-center min-w-[185px] px-4 py-2 rounded-lg border ${
+            className={`flex flex-col items-center justify-center min-w-[185px] px-4 py-2 rounded-lg border focus:outline-none focus:ring-0 ${
               tab === 'manage' ? 'bg-blue-600 text-white' : 'bg-white text-black hover:bg-gray-100'
             }`}
           >
