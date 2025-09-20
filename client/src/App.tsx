@@ -128,7 +128,7 @@ function App() {
       </div>
 
       {/* ISI HALAMAN */}
-      <main className="pt-12 md:pt-24 pb-16 md:pb-0 px-4">
+      <main className="pt-6 md:pt-24 pb-16 md:pb-0 px-4">
         {renderTab()}
       </main>
     </div>
