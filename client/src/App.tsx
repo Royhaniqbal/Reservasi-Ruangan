@@ -98,27 +98,27 @@ function App() {
       <div className="flex md:hidden fixed bottom-0 left-0 right-0 bg-white border-t shadow z-50">
         <button
           onClick={() => setTab('book')}
-          className={`flex flex-col items-center justify-center flex-1 py-2 transition-transform active:scale-90 ${
+          className={`flex flex-col items-center justify-center flex-1 py-2 transition-transform active:scale-90 bg-white ${
             tab === 'book' ? 'text-blue-600' : 'text-gray-600'
           }`}
         >
           <CalendarCheck size={24} />
-          <span className="text-xs">Pinjam</span>
+          <span className="text-xs">Pinjam Ruangan</span>
         </button>
 
         <button
           onClick={() => setTab('booklist')}
-          className={`flex flex-col items-center justify-center flex-1 py-2 transition-transform active:scale-90 ${
+          className={`flex flex-col items-center justify-center flex-1 py-2 transition-transform active:scale-90 bg-white ${
             tab === 'booklist' ? 'text-blue-600' : 'text-gray-600'
           }`}
         >
           <List size={24} />
-          <span className="text-xs">Riwayat</span>
+          <span className="text-xs">Riwayat Peminjaman</span>
         </button>
 
         <button
           onClick={() => setTab('manage')}
-          className={`flex flex-col items-center justify-center flex-1 py-2 transition-transform active:scale-90 ${
+          className={`flex flex-col items-center justify-center flex-1 py-2 transition-transform active:scale-90 bg-white ${
             tab === 'manage' ? 'text-blue-600' : 'text-gray-600'
           }`}
         >
