@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import { Eye, EyeOff } from "lucide-react"; // 👈 ikon mata
+import { Eye, EyeOff } from "lucide-react";
 
 const API = import.meta.env.VITE_API_BASE_URL;
 
@@ -32,44 +32,28 @@ export default function Login({ onLogin, onSwitchToRegister }: LoginProps) {
 
   return (
     <div className="flex min-h-screen w-screen relative">
-      {/* ✅ Desktop view (hidden on mobile) */}
+      {/* ✅ Desktop view (md ke atas) */}
       <div className="hidden md:flex w-full">
-        {/* Left Panel (60%) */}
+        {/* Left Panel */}
         <div className="w-3/5 bg-white flex flex-col justify-center items-center space-y-10">
-          <img
-            src="/logokemnaker.png"
-            alt="Kemnaker"
-            className="h-80 select-none pointer-events-none"
-            draggable={false}
-            onContextMenu={(e) => e.preventDefault()}
-          />
+          <img src="/logokemnaker.png" alt="Kemnaker" className="h-80 select-none pointer-events-none" />
           <hr className="w-2/3 border-t-2 border-blue-700" />
-          <img
-            src="/logovokasi.png"
-            alt="Pelatihan Vokasi"
-            className="h-40 select-none pointer-events-none"
-            draggable={false}
-            onContextMenu={(e) => e.preventDefault()}
-          />
+          <img src="/logovokasi.png" alt="Pelatihan Vokasi" className="h-40 select-none pointer-events-none" />
         </div>
 
-        {/* Right Panel (40%) */}
+        {/* Right Panel */}
         <div className="w-2/5 bg-blue-700 flex flex-col justify-center items-center text-white px-10">
           <div className="max-w-xl w-full">
             <div className="mb-40">
-              <h2 className="text-center text-4xl font-bold">
-                SELAMAT DATANG DI
-              </h2>
+              <h2 className="text-center text-4xl font-bold">SELAMAT DATANG DI</h2>
               <h1 className="text-center text-8xl font-bold mb-2">SIPAMAN</h1>
               <p className="text-center text-2xl mb-6">
                 Sistem Informasi Pelayanan Peminjaman Ruangan
               </p>
             </div>
 
-            <form
-              onSubmit={handleLogin}
-              className="space-y-4 flex flex-col items-center"
-            >
+            {/* Form */}
+            <form onSubmit={handleLogin} className="space-y-4 flex flex-col items-center">
               {error && (
                 <p className="text-red-300 bg-red-800 bg-opacity-40 p-2 rounded text-center w-8/12">
                   {error}
@@ -85,7 +69,7 @@ export default function Login({ onLogin, onSwitchToRegister }: LoginProps) {
                 required
               />
 
-              {/* Password dengan tombol mata */}
+              {/* Password */}
               <div className="relative w-7/12">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -98,7 +82,7 @@ export default function Login({ onLogin, onSwitchToRegister }: LoginProps) {
                 <button
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 bg-transparent border-none p-0 focus:outline-none"
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -117,8 +101,7 @@ export default function Login({ onLogin, onSwitchToRegister }: LoginProps) {
                 Belum punya akun?{" "}
                 <button
                   onClick={onSwitchToRegister}
-                  className="bg-transparent p-0 text-white underline hover:text-blue-300 font-semibold cursor-pointer focus:outline-none"
-                  style={{ display: "inline", border: "none" }}
+                  className="bg-transparent p-0 text-white underline hover:text-blue-300 font-semibold"
                 >
                   Daftar di sini
                 </button>
@@ -127,31 +110,22 @@ export default function Login({ onLogin, onSwitchToRegister }: LoginProps) {
           </div>
         </div>
 
-        {/* Credit text di pojok kanan bawah */}
         <p className="absolute bottom-6 right-[15.5rem] text-[9px] text-white">
           Dibuat oleh M. Royhan Iqbal
         </p>
       </div>
 
-      {/* ✅ Mobile view (hidden on desktop) */}
+      {/* ✅ Mobile view (sm - md) */}
       <div className="flex flex-col md:hidden w-full items-center justify-center bg-blue-700 text-white px-6">
-        <img
-          src="/logokemnaker.png"
-          alt="Kemnaker"
-          className="h-28 mt-8 select-none pointer-events-none"
-          draggable={false}
-          onContextMenu={(e) => e.preventDefault()}
-        />
+        <img src="/logokemnaker.png" alt="Kemnaker" className="h-28 mt-8 select-none pointer-events-none" />
 
         <h1 className="text-5xl font-bold mt-6">SIPAMAN</h1>
         <p className="text-center text-lg mb-8">
           Sistem Informasi Pelayanan Peminjaman Ruangan
         </p>
 
-        <form
-          onSubmit={handleLogin}
-          className="space-y-4 flex flex-col items-center w-full"
-        >
+        {/* Form Mobile */}
+        <form onSubmit={handleLogin} className="space-y-4 flex flex-col items-center w-full">
           {error && (
             <p className="text-red-300 bg-red-800 bg-opacity-40 p-2 rounded text-center w-10/12">
               {error}
@@ -167,7 +141,7 @@ export default function Login({ onLogin, onSwitchToRegister }: LoginProps) {
             required
           />
 
-          {/* Password dengan tombol mata */}
+          {/* Password */}
           <div className="relative w-10/12">
             <input
               type={showPassword ? "text" : "password"}
@@ -180,7 +154,7 @@ export default function Login({ onLogin, onSwitchToRegister }: LoginProps) {
             <button
               type="button"
               onClick={() => setShowPassword((prev) => !prev)}
-              className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 bg-transparent border-none p-0 focus:outline-none"
+              className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
             >
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
@@ -199,18 +173,14 @@ export default function Login({ onLogin, onSwitchToRegister }: LoginProps) {
             Belum punya akun?{" "}
             <button
               onClick={onSwitchToRegister}
-              className="bg-transparent p-0 text-white underline hover:text-blue-300 font-semibold cursor-pointer focus:outline-none"
-              style={{ display: "inline", border: "none" }}
+              className="bg-transparent p-0 text-white underline hover:text-blue-300 font-semibold"
             >
               Daftar di sini
             </button>
           </p>
         </form>
 
-        {/* Credit text */}
-        <p className="mt-6 mb-4 text-[9px] text-white">
-          Dibuat oleh M. Royhan Iqbal
-        </p>
+        <p className="mt-6 mb-4 text-[9px] text-white">Dibuat oleh M. Royhan Iqbal</p>
       </div>
     </div>
   );
