@@ -70,8 +70,8 @@ export default function Register({ onRegister, onSwitchToLogin }: RegisterProps)
               {/* Password */}
               <div className="relative w-7/12">
                 <input type={showPassword ? "text" : "password"} placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-3 py-2 rounded-full border bg-white border-gray-300 text-black text-lg pr-10" required />
-                <button type="button" onClick={() => setShowPassword((prev) => !prev)} className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700">
-                  {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                <button type="button" onClick={() => setShowPassword((prev) => !prev)} className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 bg-white p-1 rounded-full shadow-sm">
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
 
@@ -114,8 +114,8 @@ export default function Register({ onRegister, onSwitchToLogin }: RegisterProps)
 
             <div className="relative w-10/12">
               <input type={showPassword ? "text" : "password"} placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-3 py-2 rounded-full border bg-white border-gray-300 text-black text-base pr-10" required />
-              <button type="button" onClick={() => setShowPassword((prev) => !prev)} className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700">
-                {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+              <button type="button" onClick={() => setShowPassword((prev) => !prev)} className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 bg-white p-1 rounded-full shadow-sm">
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
 
