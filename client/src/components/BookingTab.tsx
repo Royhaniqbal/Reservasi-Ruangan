@@ -318,7 +318,7 @@ export default function BookingTab({
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="w-full border rounded-lg px-3 py-2 font-normal"
+              className="w-full border rounded-lg px-3 py-2 font-normal bg-white"
             />
           </div>
 
@@ -351,7 +351,7 @@ export default function BookingTab({
                   setTimeStart(e.target.value);
                   setTimeEnd(""); // reset end saat ganti start
                 }}
-                className="w-1/2 border rounded-lg px-3 py-2 font-normal"
+                className="w-1/2 border rounded-lg px-3 py-2 font-normal bg-white"
               >
                 <option value="">Pilih</option>
                 {startOptions.map((t: string) => (
@@ -364,7 +364,7 @@ export default function BookingTab({
               <select
                 value={timeEnd}
                 onChange={(e) => setTimeEnd(e.target.value)}
-                className="w-1/2 border rounded-lg px-3 py-2 font-normal"
+                className="w-1/2 border rounded-lg px-3 py-2 font-normal bg-white"
                 disabled={!timeStart || endOptions.length === 0}
               >
                 <option value="">Pilih</option>
