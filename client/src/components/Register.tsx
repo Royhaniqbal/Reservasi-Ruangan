@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import { Eye, EyeOff } from "lucide-react"; // 👈 import ikon
+import { Eye, EyeOff } from "lucide-react"; // 👈 ikon mata
 
 const API = import.meta.env.VITE_API_BASE_URL;
 
@@ -34,143 +34,246 @@ export default function Register({ onRegister, onSwitchToLogin }: RegisterProps)
 
       setError("");
       setSuccess("✅ Pendaftaran berhasil! Silakan login.");
-    } catch {
+    } catch (err) {
       setSuccess("");
       setError("Pendaftaran gagal ❌. Coba gunakan email lain.");
     }
   };
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen w-screen relative">
-      {/* Left Panel (logo) */}
-      <div className="w-full md:w-3/5 bg-white flex flex-col justify-center items-center space-y-8 p-6">
+    <div className="flex min-h-screen w-screen relative">
+      {/* ✅ Desktop view */}
+      <div className="hidden md:flex w-full">
+        {/* Left Panel (60%) */}
+        <div className="w-3/5 bg-white flex flex-col justify-center items-center space-y-10">
+          <img
+            src="/logokemnaker.png"
+            alt="Kemnaker"
+            className="h-80 select-none pointer-events-none"
+            draggable={false}
+            onContextMenu={(e) => e.preventDefault()}
+          />
+          <hr className="w-2/3 border-t-2 border-blue-700" />
+          <img
+            src="/logovokasi.png"
+            alt="Pelatihan Vokasi"
+            className="h-40 select-none pointer-events-none"
+            draggable={false}
+            onContextMenu={(e) => e.preventDefault()}
+          />
+        </div>
+
+        {/* Right Panel (40%) */}
+        <div className="w-2/5 bg-blue-700 flex flex-col justify-center items-center text-white px-10">
+          <div className="max-w-xl w-full flex flex-col items-center">
+            <div className="mb-16">
+              <h2 className="text-center text-4xl font-bold">BUAT AKUN BARU</h2>
+              <h1 className="text-center text-8xl font-bold mb-2">SIPAMAN</h1>
+              <p className="text-center text-2xl">
+                Sistem Informasi Pelayanan Peminjaman Ruangan
+              </p>
+            </div>
+
+            <form
+              onSubmit={handleRegister}
+              className="space-y-4 flex flex-col items-center w-full"
+            >
+              {error && (
+                <p className="text-red-300 bg-red-800 bg-opacity-40 p-2 rounded text-center w-8/12">
+                  {error}
+                </p>
+              )}
+              {success && (
+                <p className="text-green-300 bg-green-800 bg-opacity-40 p-2 rounded text-center w-8/12">
+                  {success}
+                </p>
+              )}
+
+              <input
+                type="text"
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-7/12 px-3 py-2 rounded-full border bg-white border-gray-300 text-black text-lg"
+                required
+              />
+              <input
+                type="email"
+                placeholder="E-Mail"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-7/12 px-3 py-2 rounded-full border bg-white border-gray-300 text-black text-lg"
+                required
+              />
+
+              {/* Password dengan tombol mata */}
+              <div className="relative w-7/12">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-3 py-2 rounded-full border bg-white border-gray-300 text-black text-lg pr-10"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 bg-transparent border-none p-0 focus:outline-none"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+
+              {/* Dropdown Role */}
+              <div className="relative w-7/12">
+                <select
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="appearance-none w-full px-5 py-2 rounded-full border border-gray-300 bg-white text-black text-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer transition"
+                  required
+                >
+                  <option value="user">👤 User</option>
+                  {/* <option value="admin">⚙️ Admin</option> */}
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-6 flex items-center text-gray-500">
+                  ▼
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-3/12 py-2 bg-white text-blue-700 font-semibold rounded-full 
+                          hover:bg-gray-100 transition text-lg shadow-md active:scale-95"
+              >
+                Register
+              </button>
+            </form>
+
+            <p className="mt-6 text-sm">
+              Sudah punya akun?{" "}
+              <button
+                onClick={onSwitchToLogin}
+                className="bg-transparent p-0 text-white underline hover:text-blue-300 font-semibold cursor-pointer focus:outline-none"
+                style={{ display: "inline", border: "none" }}
+              >
+                Login di sini
+              </button>
+            </p>
+          </div>
+        </div>
+
+        <p className="absolute bottom-6 right-[15.5rem] text-[9px] text-white">
+          Dibuat oleh M. Royhan Iqbal
+        </p>
+      </div>
+
+      {/* ✅ Mobile view */}
+      <div className="flex flex-col md:hidden w-full items-center justify-center bg-blue-700 text-white px-6">
         <img
           src="/logokemnaker.png"
           alt="Kemnaker"
-          className="h-40 md:h-80 select-none pointer-events-none"
+          className="h-28 mt-8 select-none pointer-events-none"
           draggable={false}
           onContextMenu={(e) => e.preventDefault()}
         />
-        <hr className="w-2/3 border-t-2 border-blue-700" />
-        <img
-          src="/logovokasi.png"
-          alt="Pelatihan Vokasi"
-          className="h-20 md:h-40 select-none pointer-events-none"
-          draggable={false}
-          onContextMenu={(e) => e.preventDefault()}
-        />
-      </div>
 
-      {/* Right Panel (form) */}
-      <div className="w-full md:w-2/5 bg-blue-700 flex flex-col justify-center items-center text-white px-6 py-10">
-        <div className="max-w-md w-full flex flex-col items-center">
-          {/* Heading */}
-          <div className="mb-10 text-center">
-            <h2 className="text-2xl md:text-4xl font-bold">BUAT AKUN BARU</h2>
-            <h1 className="text-5xl md:text-8xl font-bold mb-2">SIPAMAN</h1>
-            <p className="text-lg md:text-2xl">
-              Sistem Informasi Pelayanan Peminjaman Ruangan
+        <h1 className="text-5xl font-bold mt-6">SIPAMAN</h1>
+        <p className="text-center text-lg mb-8">
+          Sistem Informasi Pelayanan Peminjaman Ruangan
+        </p>
+
+        <form
+          onSubmit={handleRegister}
+          className="space-y-4 flex flex-col items-center w-full"
+        >
+          {error && (
+            <p className="text-red-300 bg-red-800 bg-opacity-40 p-2 rounded text-center w-10/12">
+              {error}
             </p>
+          )}
+          {success && (
+            <p className="text-green-300 bg-green-800 bg-opacity-40 p-2 rounded text-center w-10/12">
+              {success}
+            </p>
+          )}
+
+          <input
+            type="text"
+            placeholder="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            className="w-10/12 px-3 py-2 rounded-full border bg-white border-gray-300 text-black text-base"
+            required
+          />
+          <input
+            type="email"
+            placeholder="E-Mail"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-10/12 px-3 py-2 rounded-full border bg-white border-gray-300 text-black text-base"
+            required
+          />
+
+          {/* Password dengan tombol mata */}
+          <div className="relative w-10/12">
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-3 py-2 rounded-full border bg-white border-gray-300 text-black text-base pr-10"
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 bg-transparent border-none p-0 focus:outline-none"
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
           </div>
 
-          {/* Form */}
-          <form
-            onSubmit={handleRegister}
-            className="space-y-4 flex flex-col items-center w-full"
+          {/* Dropdown Role */}
+          <div className="relative w-10/12">
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className="appearance-none w-full px-5 py-2 rounded-full border border-gray-300 bg-white text-black text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer transition"
+              required
+            >
+              <option value="user">👤 User</option>
+              {/* <option value="admin">⚙️ Admin</option> */}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-6 flex items-center text-gray-500">
+              ▼
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className="w-5/12 py-2 bg-white text-blue-700 font-semibold rounded-full 
+                      hover:bg-gray-100 transition text-base shadow-md active:scale-95"
           >
-            {error && (
-              <p className="text-red-300 bg-red-800 bg-opacity-40 p-2 rounded text-center w-10/12">
-                {error}
-              </p>
-            )}
+            Register
+          </button>
+        </form>
 
-            <input
-              type="text"
-              placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-10/12 px-3 py-2 rounded-full border bg-white border-gray-300 text-black text-base md:text-lg"
-              required
-            />
-            <input
-              type="email"
-              placeholder="E-Mail"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-10/12 px-3 py-2 rounded-full border bg-white border-gray-300 text-black text-base md:text-lg"
-              required
-            />
+        <p className="mt-6 text-sm">
+          Sudah punya akun?{" "}
+          <button
+            onClick={onSwitchToLogin}
+            className="bg-transparent p-0 text-white underline hover:text-blue-300 font-semibold cursor-pointer focus:outline-none"
+            style={{ display: "inline", border: "none" }}
+          >
+            Login di sini
+          </button>
+        </p>
 
-            {/* Password + eye button */}
-            <div className="relative w-10/12">
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 rounded-full border bg-white border-gray-300 text-black text-base md:text-lg pr-10"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((prev) => !prev)}
-                className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 
-                           bg-transparent border-none p-0 focus:outline-none"
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
-            </div>
-
-            {/* Dropdown Role */}
-            <div className="relative w-10/12">
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                className="appearance-none w-full px-5 py-2 rounded-full border border-gray-300 bg-white text-black text-base md:text-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer transition"
-                required
-              >
-                <option value="user">👤 User</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-6 flex items-center text-gray-500">
-                ▼
-              </div>
-            </div>
-
-            {/* Register Button */}
-            <button
-              type="submit"
-              className="w-5/12 md:w-3/12 py-2 bg-white text-blue-700 font-semibold rounded-full 
-                        hover:bg-gray-100 transition text-lg shadow-md active:scale-95"
-            >
-              Register
-            </button>
-
-            {/* Success Notification */}
-            {success && (
-              <p className="mt-4 text-green-300 bg-green-800 bg-opacity-40 p-2 rounded text-center w-10/12">
-                {success}
-              </p>
-            )}
-          </form>
-
-          {/* Switch to Login */}
-          <p className="mt-6 text-sm">
-            Sudah punya akun?{" "}
-            <button
-              onClick={onSwitchToLogin}
-              className="bg-transparent p-0 text-white underline hover:text-blue-300 font-semibold cursor-pointer focus:outline-none"
-              style={{ display: "inline", border: "none" }}
-            >
-              Login di sini
-            </button>
-          </p>
-        </div>
+        <p className="mt-6 mb-4 text-[9px] text-white">
+          Dibuat oleh M. Royhan Iqbal
+        </p>
       </div>
-
-      {/* Credit text */}
-      <p className="absolute bottom-3 right-3 text-[9px] text-gray-300 md:text-white">
-        Dibuat oleh M. Royhan Iqbal
-      </p>
     </div>
   );
 }
