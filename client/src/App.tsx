@@ -98,7 +98,7 @@ function App() {
       <div className="flex md:hidden fixed bottom-0 left-0 right-0 bg-white border-t shadow z-50">
         <button
           onClick={() => setTab('book')}
-          className={`flex flex-col items-center justify-center flex-1 py-2 transition-transform active:scale-90 active:shadow-md bg-white focus:outline-none focus:ring-0 ${
+          className={`flex flex-col items-center justify-center flex-1 py-2 transition-transform active:scale-90 active:shadow-lg bg-white focus:outline-none focus:ring-0 ${
             tab === 'book' ? 'text-blue-600' : 'text-gray-600'
           }`}
         >
@@ -108,7 +108,7 @@ function App() {
 
         <button
           onClick={() => setTab('booklist')}
-          className={`flex flex-col items-center justify-center flex-1 py-2 transition-transform active:scale-90 active:shadow-md bg-white focus:outline-none focus:ring-0 ${
+          className={`flex flex-col items-center justify-center flex-1 py-2 transition-transform active:scale-90 active:shadow-lg bg-white focus:outline-none focus:ring-0 ${
             tab === 'booklist' ? 'text-blue-600' : 'text-gray-600'
           }`}
         >
@@ -118,7 +118,7 @@ function App() {
 
         <button
           onClick={() => setTab('manage')}
-          className={`flex flex-col items-center justify-center flex-1 py-2 transition-transform active:scale-90 active:shadow-md bg-white focus:outline-none focus:ring-0 ${
+          className={`flex flex-col items-center justify-center flex-1 py-2 transition-transform active:scale-90 active:shadow-lg bg-white focus:outline-none focus:ring-0 ${
             tab === 'manage' ? 'text-blue-600' : 'text-gray-600'
           }`}
         >
@@ -128,7 +128,7 @@ function App() {
       </div>
 
       {/* ISI HALAMAN */}
-      <main className="pt-24 md:pt-24 pb-16 md:pb-0 px-4">
+      <main className="pt-12 md:pt-24 pb-16 md:pb-0 px-4">
         {renderTab()}
       </main>
     </div>
