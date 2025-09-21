@@ -209,9 +209,10 @@ export default function BookingTab({
   // ----------------------
   const handleSubmit = async () => {
     if (!bookingData.room || !bookingData.date || !bookingData.startTime || !bookingData.endTime || !bookingData.pic) {
-      toast.error("⚠️ Mohon lengkapi semua data!", {
-        style: { background: "#fee2e2", color: "#b91c1c", fontWeight: "600" },
-      });
+      // toast.error("⚠️ Mohon lengkapi semua data!", {
+      //   style: { background: "#fee2e2", color: "#b91c1c", fontWeight: "600" },
+      // });
+      alert("⚠️ Mohon lengkapi semua data!");
       return;
     }
 
@@ -219,9 +220,10 @@ export default function BookingTab({
     const startMinutes = parseToMinutes(bookingData.startTime);
     const endMinutes = parseToMinutes(bookingData.endTime);
     if (endMinutes <= startMinutes) {
-      toast.error("⚠️ Jam selesai harus lebih besar dari jam mulai!", {
-        style: { background: "#fee2e2", color: "#b91c1c", fontWeight: "600" },
-      });
+      // toast.error("⚠️ Jam selesai harus lebih besar dari jam mulai!", {
+      //   style: { background: "#fee2e2", color: "#b91c1c", fontWeight: "600" },
+      // });
+      alert("⚠️ Jam selesai harus lebih besar dari jam mulai!");
       return;
     }
 
@@ -252,14 +254,17 @@ export default function BookingTab({
 
       if (editingBooking && onFinishEdit) {
         onFinishEdit(updatedBooking);
-        toast.success("✅ Booking berhasil diperbarui!", {
-          style: { background: "#dbeafe", color: "#1e3a8a", fontWeight: "600" },
-        });
-      } else {
+        // toast.success("✅ Booking berhasil diperbarui!", {
+        //   style: { background: "#dbeafe", color: "#1e3a8a", fontWeight: "600" },
+        // });
+        alert("✅ Booking berhasil diperbarui!");
+      } 
+      else {
         setHistory((prev) => [...prev, updatedBooking]);
-        toast.success("✅ Booking baru berhasil disimpan!", {
-          style: { background: "#dbeafe", color: "#1e3a8a", fontWeight: "600" },
-        });
+        // toast.success("✅ Booking baru berhasil disimpan!", {
+        //   style: { background: "#dbeafe", color: "#1e3a8a", fontWeight: "600" },
+        // });
+        alert("✅ Booking baru berhasil disimpan!");
 
         // reset form
         setSelected(null);
