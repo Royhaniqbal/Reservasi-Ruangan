@@ -14,9 +14,13 @@ export default function Login({ onLogin, onSwitchToRegister }: LoginProps) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false); // NEW
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+    setError("");
+
     try {
       const res = await axios.post(`${API}/api/auth/login`, {
         email,
@@ -27,11 +31,20 @@ export default function Login({ onLogin, onSwitchToRegister }: LoginProps) {
       onLogin(data.user, data.token);
     } catch (err) {
       setError("E-mail atau password salah ❌");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="flex min-h-screen w-screen relative">
+      {/* Overlay Loading Spinner */}
+      {loading && (
+        <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="w-12 h-12 border-4 border-white border-t-blue-500 rounded-full animate-spin"></div>
+        </div>
+      )}
+
       {/* Desktop view (md ke atas) - logo tetap ada */}
       <div className="hidden md:flex w-full">
         {/* Left Panel */}
@@ -102,8 +115,9 @@ export default function Login({ onLogin, onSwitchToRegister }: LoginProps) {
 
               <button
                 type="submit"
+                disabled={loading}
                 className="w-3/12 py-2 bg-white text-blue-700 font-semibold rounded-full 
-                          hover:bg-gray-100 transition text-lg shadow-md active:scale-95"
+                          hover:bg-gray-100 transition text-lg shadow-md active:scale-95 disabled:opacity-60"
               >
                 Login
               </button>
@@ -127,7 +141,7 @@ export default function Login({ onLogin, onSwitchToRegister }: LoginProps) {
         </p>
       </div>
 
-      {/* Mobile view (md:hidden) - logo DIHAPUS, tampil hanya panel kanan */}
+      {/* Mobile view (md:hidden) - logo DIHAPUS */}
       <div className="flex flex-col md:hidden w-full items-center justify-center bg-blue-700 text-white px-6 py-10">
         <div className="max-w-md w-full">
           <div className="mb-6 text-center">
@@ -173,8 +187,9 @@ export default function Login({ onLogin, onSwitchToRegister }: LoginProps) {
 
             <button
               type="submit"
+              disabled={loading}
               className="w-5/12 py-2 bg-white text-blue-700 font-semibold rounded-full 
-                        hover:bg-gray-100 transition text-base shadow-md active:scale-95"
+                        hover:bg-gray-100 transition text-base shadow-md active:scale-95 disabled:opacity-60"
             >
               Login
             </button>
