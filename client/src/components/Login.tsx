@@ -14,7 +14,7 @@ export default function Login({ onLogin, onSwitchToRegister }: LoginProps) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false); // NEW
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,8 +40,9 @@ export default function Login({ onLogin, onSwitchToRegister }: LoginProps) {
     <div className="flex min-h-screen w-screen relative">
       {/* Overlay Loading Spinner */}
       {loading && (
-        <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+        <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col items-center justify-center z-50">
           <div className="w-12 h-12 border-4 border-white border-t-blue-500 rounded-full animate-spin"></div>
+          <p className="mt-4 text-white text-sm">Sedang proses login...</p>
         </div>
       )}
 
