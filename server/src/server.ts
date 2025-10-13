@@ -58,6 +58,7 @@ app.post("/api/check-availability", async (req: Request, res: Response) => {
 // ✅ Endpoint: Buat booking baru
 app.post("/api/book", async (req: Request, res: Response) => {
   const { room, date, startTime, endTime, pic, unitKerja } = req.body;
+  console.log("📦 Data diterima di backend:", req.body);
 
   if (!room || !date || !startTime || !endTime || !pic || !unitKerja) {
     return res.status(400).json({

@@ -235,9 +235,9 @@ export default function BookingTab({
       const method = editingBooking ? "PUT" : "POST";
 
       // 🟢 Tambahkan log ini untuk cek data sebelum dikirim
-      console.log("📤 Data booking dikirim ke backend:", bookingData);
-      console.log("➡️ Endpoint:", endpoint);
-      console.log("➡️ Method:", method);
+      // console.log("📤 Data booking dikirim ke backend:", bookingData);
+      // console.log("➡️ Endpoint:", endpoint);
+      // console.log("➡️ Method:", method);
 
       const res = await fetch(endpoint, {
         method,
@@ -245,9 +245,9 @@ export default function BookingTab({
         body: JSON.stringify(bookingData),
       });
 
-      console.log("📥 Respon dari backend:", res);
+      // console.log("📥 Respon dari backend:", res);
       const data = await res.json().catch(() => ({}));
-      console.log("📥 Data JSON dari backend:", data);
+      // console.log("📥 Data JSON dari backend:", data);
 
       if (!res.ok || data?.success === false) {
         throw new Error(data.message || "Gagal simpan booking");
