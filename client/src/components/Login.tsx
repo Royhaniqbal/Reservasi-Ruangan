@@ -18,7 +18,7 @@ export default function Login({ onLogin, onSwitchToRegister }: LoginProps) {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`http://localhost:5000/api/auth/login`, { email, password });
+      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/login`, { email, password });
       const data = res.data as { user: any; token: string };
       localStorage.setItem("token", data.token);
       onLogin(data.user, data.token);

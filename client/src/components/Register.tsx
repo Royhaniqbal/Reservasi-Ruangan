@@ -21,7 +21,7 @@ export default function Register({ onRegister, onSwitchToLogin }: RegisterProps)
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`http://localhost:5000/api/auth/register`, {
+      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/register`, {
         username,
         email,
         password,
