@@ -29,8 +29,7 @@ const SHEET_MAP: Record<string, string> = {
 
 // Helper untuk dapatkan nama sheet berdasarkan room
 function getSheetName(room: string): string {
-  // return SHEET_MAP[room] || "Sheet1"; // fallback ke Sheet1 kalau tidak cocok
-  return SHEET_MAP[room];
+  return SHEET_MAP[room] || "Sheet1";
 }
 
 // ✅ Tambahkan booking ke Google Sheets
@@ -40,9 +39,10 @@ export async function appendBookingToSheet(bookingData: {
   startTime: string;
   endTime: string;
   pic: string;
+  unitKerja: string; // ✅ field baru
 }) {
   const sheetName = getSheetName(bookingData.room);
-  const range = `${sheetName}!A:E`;
+  const range = `${sheetName}!A:F`; // ✅ karena ada 6 kolom sekarang
 
   await sheets.spreadsheets.values.append({
     spreadsheetId: SPREADSHEET_ID,
@@ -56,6 +56,7 @@ export async function appendBookingToSheet(bookingData: {
           bookingData.startTime,
           bookingData.endTime,
           bookingData.pic,
+          bookingData.unitKerja, // ✅ ditambahkan di kolom terakhir
         ],
       ],
     },
@@ -71,9 +72,10 @@ export async function deleteBookingFromSheet(bookingData: {
   startTime: string;
   endTime: string;
   pic: string;
+  unitKerja: string;
 }) {
   const sheetName = getSheetName(bookingData.room);
-  const range = `${sheetName}!A:E`;
+  const range = `${sheetName}!A:F`; // ✅ karena 6 kolom
 
   const response = await sheets.spreadsheets.values.get({
     spreadsheetId: SPREADSHEET_ID,
@@ -85,7 +87,7 @@ export async function deleteBookingFromSheet(bookingData: {
   const normalize = (val: string | undefined) => (val || "").toString().trim();
 
   const rowIndex = rows.findIndex((row) => {
-    const [room, date, startTime, endTime, pic] = row.map((cell) =>
+    const [room, date, startTime, endTime, pic, unitKerja] = row.map((cell) =>
       normalize(cell)
     );
 
@@ -98,7 +100,8 @@ export async function deleteBookingFromSheet(bookingData: {
       (endTime === normalize(bookingData.endTime) ||
         endTime === `${normalize(bookingData.endTime)}:00` ||
         endTime === normalize(bookingData.endTime).replace(/^0/, "")) &&
-      pic === normalize(bookingData.pic)
+      pic === normalize(bookingData.pic) &&
+      unitKerja === normalize(bookingData.unitKerja)
     );
   });
 

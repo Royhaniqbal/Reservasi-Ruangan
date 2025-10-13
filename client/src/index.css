@@ -70,3 +70,12 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* ✅ Tambahan fix untuk input tanggal */
+input[type="date"] {
+  color-scheme: light; /* paksa tema terang agar icon kalender kontras */
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0); /* jadikan icon hitam (selalu kelihatan di background putih) */
+}

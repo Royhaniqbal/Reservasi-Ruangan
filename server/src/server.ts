@@ -1,4 +1,3 @@
-// backend/server.ts
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -8,10 +7,10 @@ import cors from "cors";
 import { connectDB } from "./db";
 import Booking from "./models/Booking";
 import { appendBookingToSheet, deleteBookingFromSheet } from "./syncSheets";
-import authRoutes from './routes/auth';
+import authRoutes from "./routes/auth";
 import jwt from "jsonwebtoken";
 import User from "./models/User";
-import { sendWhatsAppMessage } from "./sendWhatsAppMessage"; // ✅ Import WA helper
+import { sendWhatsAppMessage } from "./sendWhatsAppMessage";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -23,8 +22,7 @@ app.use(bodyParser.json());
 // ✅ Connect ke MongoDB
 connectDB();
 
-app.use('/api/auth', authRoutes);
-
+app.use("/api/auth", authRoutes);
 
 // ✅ Endpoint: Cek ketersediaan
 app.post("/api/check-availability", async (req: Request, res: Response) => {
@@ -59,11 +57,14 @@ app.post("/api/check-availability", async (req: Request, res: Response) => {
 
 // ✅ Endpoint: Buat booking baru
 app.post("/api/book", async (req: Request, res: Response) => {
-  // console.log("📩 Data dari frontend:", req.body);
-  const { room, date, startTime, endTime, pic } = req.body;
+  const { room, date, startTime, endTime, pic, unitKerja } = req.body;
+  console.log("📦 Data diterima di backend:", req.body);
 
-  if (!room || !date || !startTime || !endTime || !pic) {
-    return res.status(400).json({ success: false, message: "Data booking tidak lengkap" });
+  if (!room || !date || !startTime || !endTime || !pic || !unitKerja) {
+    return res.status(400).json({
+      success: false,
+      message: "Data booking tidak lengkap (termasuk unit kerja)",
+    });
   }
 
   try {
@@ -82,11 +83,18 @@ app.post("/api/book", async (req: Request, res: Response) => {
       });
     }
 
-    const newBooking = new Booking({ room, date, startTime, endTime, pic });
+    const newBooking = new Booking({
+      room,
+      date,
+      startTime,
+      endTime,
+      pic,
+      unitKerja,
+    });
     await newBooking.save();
 
     try {
-      await appendBookingToSheet({ room, date, startTime, endTime, pic });
+      await appendBookingToSheet({ room, date, startTime, endTime, pic, unitKerja });
     } catch (err) {
       console.error("⚠️ Gagal sinkron ke Google Sheets:", err);
     }
@@ -96,12 +104,12 @@ app.post("/api/book", async (req: Request, res: Response) => {
 🏢 ${room}
 📅 ${date}
 ⏰ ${startTime} - ${endTime}
-👤 ${pic}`;
+👤 ${pic}
+🏬 Unit Kerja: ${unitKerja}`;
     await sendWhatsAppMessage("6281335382726", msg);
 
     res.json({ success: true, message: "Booking berhasil dibuat", ...newBooking.toObject() });
   } catch (error) {
-    // console.error("❌ Error saat simpan booking:", error);
     res.status(500).json({ success: false, message: "Gagal simpan booking" });
   }
 });
@@ -109,10 +117,13 @@ app.post("/api/book", async (req: Request, res: Response) => {
 // ✅ Endpoint: Update booking
 app.put("/api/book/:id", async (req: Request, res: Response) => {
   const { id } = req.params;
-  const { room, date, startTime, endTime, pic } = req.body;
+  const { room, date, startTime, endTime, pic, unitKerja } = req.body;
 
-  if (!room || !date || !startTime || !endTime || !pic) {
-    return res.status(400).json({ success: false, message: "Data booking tidak lengkap" });
+  if (!room || !date || !startTime || !endTime || !pic || !unitKerja) {
+    return res.status(400).json({
+      success: false,
+      message: "Data booking tidak lengkap (termasuk unit kerja)",
+    });
   }
 
   try {
@@ -138,7 +149,7 @@ app.put("/api/book/:id", async (req: Request, res: Response) => {
 
     const updated = await Booking.findByIdAndUpdate(
       id,
-      { room, date, startTime, endTime, pic },
+      { room, date, startTime, endTime, pic, unitKerja },
       { new: true }
     );
 
@@ -154,6 +165,7 @@ app.put("/api/book/:id", async (req: Request, res: Response) => {
         startTime: oldBooking.startTime,
         endTime: oldBooking.endTime,
         pic: oldBooking.pic,
+        unitKerja: oldBooking.unitKerja,
       });
       await appendBookingToSheet({
         room: updated.room,
@@ -161,6 +173,7 @@ app.put("/api/book/:id", async (req: Request, res: Response) => {
         startTime: updated.startTime,
         endTime: updated.endTime,
         pic: updated.pic,
+        unitKerja: updated.unitKerja,
       });
     } catch (err) {
       console.error("⚠️ Gagal sinkron update ke Google Sheets:", err);
@@ -171,22 +184,22 @@ app.put("/api/book/:id", async (req: Request, res: Response) => {
 🏢 ${room}
 📅 ${date}
 ⏰ ${startTime} - ${endTime}
-👤 ${pic}`;
+👤 ${pic}
+🏬 Unit Kerja: ${unitKerja}`;
     await sendWhatsAppMessage("6281335382726", msg);
 
     res.json({ success: true, message: "Booking berhasil diupdate", ...updated.toObject() });
   } catch (error) {
-    // console.error("❌ Error saat update booking:", error);
     res.status(500).json({ success: false, message: "Gagal update booking" });
   }
 });
 
 // ✅ Endpoint: Batalkan booking
 app.post("/api/cancel-booking", async (req: Request, res: Response) => {
-  const { room, date, startTime, endTime, pic } = req.body;
+  const { room, date, startTime, endTime, pic, unitKerja } = req.body;
 
   try {
-    const booking = await Booking.findOne({ room, date, startTime, endTime, pic });
+    const booking = await Booking.findOne({ room, date, startTime, endTime, pic, unitKerja });
     if (!booking) {
       return res.json({ success: false, message: "Booking tidak ditemukan" });
     }
@@ -200,6 +213,7 @@ app.post("/api/cancel-booking", async (req: Request, res: Response) => {
         startTime: booking.startTime,
         endTime: booking.endTime,
         pic: booking.pic,
+        unitKerja: booking.unitKerja,
       });
     } catch (err) {
       console.error("⚠️ Gagal hapus dari Google Sheets:", err);
@@ -210,12 +224,12 @@ app.post("/api/cancel-booking", async (req: Request, res: Response) => {
 🏢 ${booking.room}
 📅 ${booking.date}
 ⏰ ${booking.startTime} - ${booking.endTime}
-👤 ${booking.pic}`;
+👤 ${booking.pic}
+🏬 Unit Kerja: ${booking.unitKerja}`;
     await sendWhatsAppMessage("6281335382726", msg);
 
     res.json({ success: true, message: "Booking berhasil dibatalkan" });
   } catch (err) {
-    // console.error("❌ Error saat cancel booking:", err);
     res.status(500).json({ success: false, message: "Gagal membatalkan booking" });
   }
 });
@@ -239,7 +253,6 @@ app.get("/api/my-bookings", async (req: Request, res: Response) => {
     const bookings = await Booking.find({ pic: user.username }).sort({ date: -1 });
     res.json(bookings);
   } catch (err) {
-    // console.error("❌ Error get my bookings:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -250,5 +263,5 @@ app.get("/", (_req: Request, res: Response) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });

@@ -5,7 +5,7 @@ export default function HomeTab() {
         <div className="footer mt-[100px] text-left">
           <p className="font-bold mb-2">Langkah-langkah peminjaman ruangan :</p>
           <ol className="list-decimal list-outside pl-6 space-y-2">
-            <li>Klik tab "Pinjam Ruangan".</li>
+            <li>Klik tab "Pinjam Ruangan Sekarang".</li>
             <li>Pilih ruangan.</li>
             <li>Masukkan tanggal pemakaian ruangan.</li>
             <li>
