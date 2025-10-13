@@ -234,13 +234,20 @@ export default function BookingTab({
       const endpoint = editingBooking ? `${API}/api/book/${bookingData._id}` : `${API}/api/book`;
       const method = editingBooking ? "PUT" : "POST";
 
+      // 🟢 Tambahkan log ini untuk cek data sebelum dikirim
+      console.log("📤 Data booking dikirim ke backend:", bookingData);
+      console.log("➡️ Endpoint:", endpoint);
+      console.log("➡️ Method:", method);
+
       const res = await fetch(endpoint, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(bookingData),
       });
 
+      console.log("📥 Respon dari backend:", res);
       const data = await res.json().catch(() => ({}));
+      console.log("📥 Data JSON dari backend:", data);
 
       if (!res.ok || data?.success === false) {
         throw new Error(data.message || "Gagal simpan booking");
