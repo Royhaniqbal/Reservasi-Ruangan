@@ -22,6 +22,17 @@ export default function BookingTab({
   const [timeEnd, setTimeEnd] = useState<string>("");
   const [pic, setPic] = useState<string>("");
 
+  // 🔹 Tambahan: Unit Kerja
+  const [unitKerja, setUnitKerja] = useState<string>("");
+  const unitOptions = [
+    "Setditjen",
+    "Bina Stankom",
+    "Bina Intala",
+    "Bina Lemlatvok",
+    "Bina Lavogan",
+    "Bina Produktivitas",
+  ];
+
   const rooms: { id: number; name: string; capacity: string; img: string }[] = [
     { id: 1, name: "Ruang Rapat Dirjen", capacity: "24 orang", img: "/gambarsatu.jpg" },
     { id: 2, name: "Ruang Rapat Sesditjen", capacity: "10 orang", img: "/gambardua.jpeg" },
@@ -38,6 +49,7 @@ export default function BookingTab({
     startTime: timeStart || null,
     endTime: timeEnd || null,
     pic: pic || null,
+    unitKerja: unitKerja || null, // ✅ tambahan baru
   };
 
   // ----------------------
@@ -86,6 +98,7 @@ export default function BookingTab({
       setTimeStart(editingBooking.startTime || "");
       setTimeEnd(editingBooking.endTime || "");
       setPic(editingBooking.pic || "");
+      setUnitKerja(editingBooking.unitKerja || ""); // ✅ ikut isi jika sedang edit
     }
   }, [editingBooking]);
 
@@ -147,13 +160,11 @@ export default function BookingTab({
       const start = parseToMinutes(slot.startTime);
       const end = parseToMinutes(slot.endTime);
       let current = start;
-      // start options: include start times but stop before end (so start < end)
       while (current < end) {
         options.push(formatFromMinutes(current));
         current += 30;
       }
     });
-    // unique + sorted
     return Array.from(new Set(options)).sort();
   };
 
@@ -162,8 +173,6 @@ export default function BookingTab({
     const options: string[] = [];
 
     const startMin = parseToMinutes(timeStart);
-
-    // cari slot yang mengandung timeStart
     const slot = availability.find((s: AvailabilitySlot) => {
       const sStart = parseToMinutes(s.startTime);
       const sEnd = parseToMinutes(s.endTime);
@@ -171,58 +180,52 @@ export default function BookingTab({
     });
 
     if (!slot) return [];
-
     const slotEndMin = parseToMinutes(slot.endTime);
 
-    // end options mulai dari minimal 30 menit setelah start sampai slotEnd (termasuk slotEnd)
     let current = startMin + 30;
     while (current <= slotEndMin) {
       options.push(formatFromMinutes(current));
       current += 30;
     }
-
     return options;
   };
 
-  // Jika availability berubah dan timeStart tidak valid lagi → reset start & end
+  // Reset otomatis
   useEffect(() => {
     const starts = generateStartOptions();
     if (timeStart && !starts.includes(timeStart)) {
       setTimeStart("");
       setTimeEnd("");
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [availability]);
 
-  // Jika user ganti start yang membuat timeEnd menjadi invalid → reset end
   useEffect(() => {
     if (!timeStart) return;
     const ends = generateEndOptions();
     if (timeEnd && !ends.includes(timeEnd)) {
       setTimeEnd("");
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeStart, availability]);
 
   // ----------------------
-  // Simpan / update booking (dengan validasi end > start)
+  // Simpan / update booking
   // ----------------------
   const handleSubmit = async () => {
-    if (!bookingData.room || !bookingData.date || !bookingData.startTime || !bookingData.endTime || !bookingData.pic) {
-      // toast.error("⚠️ Mohon lengkapi semua data!", {
-      //   style: { background: "#fee2e2", color: "#b91c1c", fontWeight: "600" },
-      // });
-      alert("⚠️ Mohon lengkapi semua data!");
+    if (
+      !bookingData.room ||
+      !bookingData.date ||
+      !bookingData.startTime ||
+      !bookingData.endTime ||
+      !bookingData.pic ||
+      !bookingData.unitKerja
+    ) {
+      alert("⚠️ Mohon lengkapi semua data termasuk Unit Kerja!");
       return;
     }
 
-    // Validasi: endTime harus lebih besar dari startTime
     const startMinutes = parseToMinutes(bookingData.startTime);
     const endMinutes = parseToMinutes(bookingData.endTime);
     if (endMinutes <= startMinutes) {
-      // toast.error("⚠️ Jam selesai harus lebih besar dari jam mulai!", {
-      //   style: { background: "#fee2e2", color: "#b91c1c", fontWeight: "600" },
-      // });
       alert("⚠️ Jam selesai harus lebih besar dari jam mulai!");
       return;
     }
@@ -250,27 +253,20 @@ export default function BookingTab({
         startTime: data.startTime || bookingData.startTime,
         endTime: data.endTime || bookingData.endTime,
         pic: data.pic || bookingData.pic,
+        unitKerja: data.unitKerja || bookingData.unitKerja, // ✅ ikut dikembalikan
       };
 
       if (editingBooking && onFinishEdit) {
         onFinishEdit(updatedBooking);
-        // toast.success("✅ Booking berhasil diperbarui!", {
-        //   style: { background: "#dbeafe", color: "#1e3a8a", fontWeight: "600" },
-        // });
         alert("✅ Booking berhasil diperbarui!");
-      } 
-      else {
+      } else {
         setHistory((prev) => [...prev, updatedBooking]);
-        // toast.success("✅ Booking baru berhasil disimpan!", {
-        //   style: { background: "#dbeafe", color: "#1e3a8a", fontWeight: "600" },
-        // });
         alert("✅ Booking baru berhasil disimpan!");
-
-        // reset form
         setSelected(null);
         setSelectedDate("");
         setTimeStart("");
         setTimeEnd("");
+        setUnitKerja("");
       }
     } catch (err: any) {
       console.error("Submit error:", err);
@@ -354,7 +350,7 @@ export default function BookingTab({
                 value={timeStart}
                 onChange={(e) => {
                   setTimeStart(e.target.value);
-                  setTimeEnd(""); // reset end saat ganti start
+                  setTimeEnd("");
                 }}
                 className="w-1/2 border rounded-lg px-3 py-2 font-normal bg-white"
               >
@@ -391,6 +387,23 @@ export default function BookingTab({
               readOnly
               className="w-full border rounded-lg px-3 py-2 font-normal bg-gray-100 text-gray-700"
             />
+          </div>
+
+          {/* ✅ Unit Kerja */}
+          <div className="mb-4">
+            <label className="block text-sm mb-1">Unit Kerja</label>
+            <select
+              value={unitKerja}
+              onChange={(e) => setUnitKerja(e.target.value)}
+              className="w-full border rounded-lg px-3 py-2 font-normal bg-white"
+            >
+              <option value="">Pilih Unit Kerja</option>
+              {unitOptions.map((unit) => (
+                <option key={unit} value={unit}>
+                  {unit}
+                </option>
+              ))}
+            </select>
           </div>
 
           <button
