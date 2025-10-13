@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import './App.css'
 import BookingTab from './components/BookingTab';
-// import HomeTab from './components/HomeTab';
 import ListTab from './components/ListTab';
 import ManageTab from './components/ManageTab';
 import Login from "./components/Login";
@@ -20,7 +19,7 @@ interface User {
 }
 
 function App() {
-  const [tab, setTab] = useState('book'); // 👈 default langsung ke "Pinjam Ruangan"
+  const [tab, setTab] = useState('book');
   const [history, setHistory] = useState<any[]>([]); 
   const [user, setUser] = useState<User | null>(null);
   const [authPage, setAuthPage] = useState<"login" | "register">("login");
@@ -34,11 +33,10 @@ function App() {
       case 'manage': 
         return <ManageTab />;
       default: 
-        return <BookingTab setHistory={setHistory} />; // 👈 fallback ke "Pinjam Ruangan"
+        return <BookingTab setHistory={setHistory} />;
     }
   };
 
-  // 🔑 If not logged in → show login/register page
   if (!user) {
     return authPage === "login" ? (
       <Login
@@ -55,20 +53,18 @@ function App() {
 
   return (
     <div className="min-h-screen bg-white text-black">
-
-      {/* NAVBAR ATAS */}
-      <div className="fixed top-0 left-0 right-0 bg-white text-black flex items-center justify-between px-4 py-1 shadow z-50">
-        {/* Logo kiri */}
+      
+      {/* NAVBAR ATAS → hanya tampil di layar medium ke atas */}
+      <div className="hidden md:flex fixed top-0 left-0 right-0 bg-white text-black items-center justify-between px-4 py-1 shadow z-50">
         <div className="flex items-center space-x-6">
           <img src="/logokemnaker.png" alt="Logo Kemnaker" className="h-12" />
           <img src="/logovokasi.png" alt="Logo Vokasi" className="h-5" />
         </div>
 
-        {/* Navigation bar kanan */}
         <div className="flex space-x-14 text-sm">
           <button
             onClick={() => setTab('book')}
-            className={`flex flex-col items-center justify-center min-w-[185px] px-4 py-2 rounded-lg border ${
+            className={`flex flex-col items-center justify-center min-w-[185px] px-4 py-2 rounded-lg border focus:outline-none focus:ring-0 ${
               tab === 'book' ? 'bg-blue-600 text-white' : 'bg-white text-black hover:bg-gray-100'
             }`}
           >
@@ -78,7 +74,7 @@ function App() {
 
           <button
             onClick={() => setTab('booklist')}
-            className={`flex flex-col items-center justify-center min-w-[185px] px-4 py-2 rounded-lg border ${
+            className={`flex flex-col items-center justify-center min-w-[185px] px-4 py-2 rounded-lg border focus:outline-none focus:ring-0 ${
               tab === 'booklist' ? 'bg-blue-600 text-white' : 'bg-white text-black hover:bg-gray-100'
             }`}
           >
@@ -88,7 +84,7 @@ function App() {
 
           <button
             onClick={() => setTab('manage')}
-            className={`flex flex-col items-center justify-center min-w-[185px] px-4 py-2 rounded-lg border ${
+            className={`flex flex-col items-center justify-center min-w-[185px] px-4 py-2 rounded-lg border focus:outline-none focus:ring-0 ${
               tab === 'manage' ? 'bg-blue-600 text-white' : 'bg-white text-black hover:bg-gray-100'
             }`}
           >
@@ -98,12 +94,45 @@ function App() {
         </div>
       </div>
 
+      {/* NAVBAR BAWAH → hanya tampil di mobile */}
+      <div className="flex md:hidden fixed bottom-0 left-0 right-0 bg-white border-t shadow z-50">
+        <button
+          onClick={() => setTab('book')}
+          className={`flex flex-col items-center justify-center flex-1 py-2 transition-transform active:scale-90 active:shadow-lg bg-white focus:outline-none focus:ring-0 ${
+            tab === 'book' ? 'text-blue-600' : 'text-gray-600'
+          }`}
+        >
+          <CalendarCheck size={24} />
+          <span className="text-xs">Pinjam Ruangan</span>
+        </button>
+
+        <button
+          onClick={() => setTab('booklist')}
+          className={`flex flex-col items-center justify-center flex-1 py-2 transition-transform active:scale-90 active:shadow-lg bg-white focus:outline-none focus:ring-0 ${
+            tab === 'booklist' ? 'text-blue-600' : 'text-gray-600'
+          }`}
+        >
+          <List size={24} />
+          <span className="text-xs">Riwayat Peminjaman</span>
+        </button>
+
+        <button
+          onClick={() => setTab('manage')}
+          className={`flex flex-col items-center justify-center flex-1 py-2 transition-transform active:scale-90 active:shadow-lg bg-white focus:outline-none focus:ring-0 ${
+            tab === 'manage' ? 'text-blue-600' : 'text-gray-600'
+          }`}
+        >
+          <User size={24} />
+          <span className="text-xs">Akun</span>
+        </button>
+      </div>
+
       {/* ISI HALAMAN */}
-      <main className="pt-24 pl-6 w-full">
+      <main className="pt-6 md:pt-24 pb-16 md:pb-0 px-4">
         {renderTab()}
       </main>
     </div>
   )
 }
 
-export default App
+export default App;

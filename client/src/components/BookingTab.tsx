@@ -22,7 +22,18 @@ export default function BookingTab({
   const [timeEnd, setTimeEnd] = useState<string>("");
   const [pic, setPic] = useState<string>("");
 
-  const rooms = [
+  // 🔹 Tambahan: Unit Kerja
+  const [unitKerja, setUnitKerja] = useState<string>("");
+  const unitOptions = [
+    "Setditjen",
+    "Bina Stankom",
+    "Bina Intala",
+    "Bina Lemlatvok",
+    "Bina Lavogan",
+    "Bina Produktivitas",
+  ];
+
+  const rooms: { id: number; name: string; capacity: string; img: string }[] = [
     { id: 1, name: "Ruang Rapat Dirjen", capacity: "24 orang", img: "/gambarsatu.jpg" },
     { id: 2, name: "Ruang Rapat Sesditjen", capacity: "10 orang", img: "/gambardua.jpeg" },
     { id: 3, name: "Command Center", capacity: "12 orang", img: "/gambarempat.jpg" },
@@ -38,9 +49,25 @@ export default function BookingTab({
     startTime: timeStart || null,
     endTime: timeEnd || null,
     pic: pic || null,
+    unitKerja: unitKerja || null, // ✅ tambahan baru
   };
 
-  // 🔹 Ambil user (PIC)
+  // ----------------------
+  // Helpers time
+  // ----------------------
+  const parseToMinutes = (t: string) => {
+    const [hh, mm] = t.split(":").map(Number);
+    return hh * 60 + mm;
+  };
+  const formatFromMinutes = (m: number) => {
+    const hh = Math.floor(m / 60).toString().padStart(2, "0");
+    const mm = (m % 60).toString().padStart(2, "0");
+    return `${hh}:${mm}`;
+  };
+
+  // ----------------------
+  // Ambil user (PIC)
+  // ----------------------
   useEffect(() => {
     const fetchUser = async () => {
       const token = localStorage.getItem("token");
@@ -60,7 +87,9 @@ export default function BookingTab({
     fetchUser();
   }, []);
 
-  // 🔹 Isi form kalau sedang edit
+  // ----------------------
+  // Isi form kalau sedang edit
+  // ----------------------
   useEffect(() => {
     if (editingBooking) {
       const room = rooms.find((r) => r.name === editingBooking.room);
@@ -69,10 +98,13 @@ export default function BookingTab({
       setTimeStart(editingBooking.startTime || "");
       setTimeEnd(editingBooking.endTime || "");
       setPic(editingBooking.pic || "");
+      setUnitKerja(editingBooking.unitKerja || ""); // ✅ ikut isi jika sedang edit
     }
   }, [editingBooking]);
 
-  // 🔹 Fetch availability
+  // ----------------------
+  // Fetch availability
+  // ----------------------
   useEffect(() => {
     const fetchAvailability = async () => {
       if (bookingData.room && bookingData.date) {
@@ -82,48 +114,119 @@ export default function BookingTab({
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ room: bookingData.room, date: bookingData.date }),
           });
+
           if (!res.ok) {
             setAvailability([]);
             return;
           }
+
+          let slots: AvailabilitySlot[] = [];
           const data = await res.json();
-          setAvailability(Array.isArray(data.available) ? data.available : []);
-        } catch {
+          if (Array.isArray(data.available)) {
+            slots = data.available as AvailabilitySlot[];
+          }
+
+          // 👉 kalau sedang edit, tambahkan slot waktu booking lama user
+          if (editingBooking && editingBooking.startTime && editingBooking.endTime) {
+            slots.push({
+              startTime: editingBooking.startTime,
+              endTime: editingBooking.endTime,
+            });
+          }
+
+          // Urutkan biar rapi
+          slots.sort((a: AvailabilitySlot, b: AvailabilitySlot) => a.startTime.localeCompare(b.startTime));
+
+          setAvailability(slots);
+        } catch (err) {
+          console.error("❌ Error fetch availability:", err);
           setAvailability([]);
         }
       } else {
         setAvailability([]);
       }
     };
-    fetchAvailability();
-  }, [bookingData.room, bookingData.date]);
 
-  // 🔹 Generate opsi jam (30 menit)
-  const generateTimeOptions = () => {
+    fetchAvailability();
+  }, [bookingData.room, bookingData.date, editingBooking]);
+
+  // ----------------------
+  // Generate opsi start / end
+  // ----------------------
+  const generateStartOptions = (): string[] => {
     if (!availability.length) return [];
     const options: string[] = [];
-    availability.forEach((slot) => {
-      const [startH, startM] = slot.startTime.split(":").map(Number);
-      const [endH, endM] = slot.endTime.split(":").map(Number);
-      let current = startH * 60 + startM;
-      const end = endH * 60 + endM;
+    availability.forEach((slot: AvailabilitySlot) => {
+      const start = parseToMinutes(slot.startTime);
+      const end = parseToMinutes(slot.endTime);
+      let current = start;
       while (current < end) {
-        const h = String(Math.floor(current / 60)).padStart(2, "0");
-        const m = String(current % 60).padStart(2, "0");
-        options.push(`${h}:${m}`);
+        options.push(formatFromMinutes(current));
         current += 30;
       }
     });
+    return Array.from(new Set(options)).sort();
+  };
+
+  const generateEndOptions = (): string[] => {
+    if (!timeStart || !availability.length) return [];
+    const options: string[] = [];
+
+    const startMin = parseToMinutes(timeStart);
+    const slot = availability.find((s: AvailabilitySlot) => {
+      const sStart = parseToMinutes(s.startTime);
+      const sEnd = parseToMinutes(s.endTime);
+      return startMin >= sStart && startMin < sEnd;
+    });
+
+    if (!slot) return [];
+    const slotEndMin = parseToMinutes(slot.endTime);
+
+    let current = startMin + 30;
+    while (current <= slotEndMin) {
+      options.push(formatFromMinutes(current));
+      current += 30;
+    }
     return options;
   };
-  const timeOptions = generateTimeOptions();
 
-  // 🔹 Simpan / update booking
+  // Reset otomatis
+  useEffect(() => {
+    const starts = generateStartOptions();
+    if (timeStart && !starts.includes(timeStart)) {
+      setTimeStart("");
+      setTimeEnd("");
+    }
+  }, [availability]);
+
+  useEffect(() => {
+    if (!timeStart) return;
+    const ends = generateEndOptions();
+    if (timeEnd && !ends.includes(timeEnd)) {
+      setTimeEnd("");
+    }
+  }, [timeStart, availability]);
+
+  // ----------------------
+  // Simpan / update booking
+  // ----------------------
   const handleSubmit = async () => {
-    if (!bookingData.room || !bookingData.date || !bookingData.startTime || !bookingData.endTime || !bookingData.pic) {
-      toast.error("⚠️ Mohon lengkapi semua data!", {
-        style: { background: "#fee2e2", color: "#b91c1c", fontWeight: "600" },
-      });
+    if (
+      !bookingData.room ||
+      !bookingData.date ||
+      !bookingData.startTime ||
+      !bookingData.endTime ||
+      !bookingData.pic ||
+      !bookingData.unitKerja
+    ) {
+      alert("⚠️ Mohon lengkapi semua data termasuk Unit Kerja!");
+      return;
+    }
+
+    const startMinutes = parseToMinutes(bookingData.startTime);
+    const endMinutes = parseToMinutes(bookingData.endTime);
+    if (endMinutes <= startMinutes) {
+      alert("⚠️ Jam selesai harus lebih besar dari jam mulai!");
       return;
     }
 
@@ -131,13 +234,20 @@ export default function BookingTab({
       const endpoint = editingBooking ? `${API}/api/book/${bookingData._id}` : `${API}/api/book`;
       const method = editingBooking ? "PUT" : "POST";
 
+      // 🟢 Tambahkan log ini untuk cek data sebelum dikirim
+      // console.log("📤 Data booking dikirim ke backend:", bookingData);
+      // console.log("➡️ Endpoint:", endpoint);
+      // console.log("➡️ Method:", method);
+
       const res = await fetch(endpoint, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(bookingData),
       });
 
+      // console.log("📥 Respon dari backend:", res);
       const data = await res.json().catch(() => ({}));
+      // console.log("📥 Data JSON dari backend:", data);
 
       if (!res.ok || data?.success === false) {
         throw new Error(data.message || "Gagal simpan booking");
@@ -150,24 +260,20 @@ export default function BookingTab({
         startTime: data.startTime || bookingData.startTime,
         endTime: data.endTime || bookingData.endTime,
         pic: data.pic || bookingData.pic,
+        unitKerja: data.unitKerja || bookingData.unitKerja, // ✅ ikut dikembalikan
       };
 
       if (editingBooking && onFinishEdit) {
         onFinishEdit(updatedBooking);
-        toast.success("✅ Booking berhasil diperbarui!", {
-          style: { background: "#dbeafe", color: "#1e3a8a", fontWeight: "600" },
-        });
+        alert("✅ Booking berhasil diperbarui!");
       } else {
         setHistory((prev) => [...prev, updatedBooking]);
-        toast.success("✅ Booking baru berhasil disimpan!", {
-          style: { background: "#dbeafe", color: "#1e3a8a", fontWeight: "600" },
-        });
-
-        // reset form
+        alert("✅ Booking baru berhasil disimpan!");
         setSelected(null);
         setSelectedDate("");
         setTimeStart("");
         setTimeEnd("");
+        setUnitKerja("");
       }
     } catch (err: any) {
       console.error("Submit error:", err);
@@ -176,6 +282,12 @@ export default function BookingTab({
       });
     }
   };
+
+  // ----------------------
+  // JSX
+  // ----------------------
+  const startOptions = generateStartOptions();
+  const endOptions = generateEndOptions();
 
   return (
     <div className="min-h-screen text-black font-bold bg-white pt-0 px-0">
@@ -214,7 +326,7 @@ export default function BookingTab({
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="w-full border rounded-lg px-3 py-2 font-normal"
+              className="w-full border rounded-lg px-3 py-2 font-normal bg-white"
             />
           </div>
 
@@ -223,7 +335,7 @@ export default function BookingTab({
             <div className="w-full border rounded-lg px-3 py-2 bg-gray-100 text-gray-700 font-normal min-h-[50px]">
               {availability.length > 0 ? (
                 <ul className="list-disc list-inside text-sm">
-                  {availability.map((slot, idx) => (
+                  {availability.map((slot: AvailabilitySlot, idx: number) => (
                     <li key={idx}>
                       {slot.startTime} - {slot.endTime}
                     </li>
@@ -243,11 +355,14 @@ export default function BookingTab({
             <div className="flex items-center gap-2">
               <select
                 value={timeStart}
-                onChange={(e) => setTimeStart(e.target.value)}
-                className="w-1/2 border rounded-lg px-3 py-2 font-normal"
+                onChange={(e) => {
+                  setTimeStart(e.target.value);
+                  setTimeEnd("");
+                }}
+                className="w-1/2 border rounded-lg px-3 py-2 font-normal bg-white"
               >
                 <option value="">Pilih</option>
-                {timeOptions.map((t) => (
+                {startOptions.map((t: string) => (
                   <option key={t} value={t}>
                     {t}
                   </option>
@@ -257,10 +372,11 @@ export default function BookingTab({
               <select
                 value={timeEnd}
                 onChange={(e) => setTimeEnd(e.target.value)}
-                className="w-1/2 border rounded-lg px-3 py-2 font-normal"
+                className="w-1/2 border rounded-lg px-3 py-2 font-normal bg-white"
+                disabled={!timeStart || endOptions.length === 0}
               >
                 <option value="">Pilih</option>
-                {timeOptions.map((t) => (
+                {endOptions.map((t: string) => (
                   <option key={t} value={t}>
                     {t}
                   </option>
@@ -278,6 +394,23 @@ export default function BookingTab({
               readOnly
               className="w-full border rounded-lg px-3 py-2 font-normal bg-gray-100 text-gray-700"
             />
+          </div>
+
+          {/* ✅ Unit Kerja */}
+          <div className="mb-4">
+            <label className="block text-sm mb-1">Unit Kerja</label>
+            <select
+              value={unitKerja}
+              onChange={(e) => setUnitKerja(e.target.value)}
+              className="w-full border rounded-lg px-3 py-2 font-normal bg-white"
+            >
+              <option value="">Pilih Unit Kerja</option>
+              {unitOptions.map((unit) => (
+                <option key={unit} value={unit}>
+                  {unit}
+                </option>
+              ))}
+            </select>
           </div>
 
           <button
