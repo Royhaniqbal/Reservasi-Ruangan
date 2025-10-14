@@ -8,17 +8,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.appendBookingToSheet = appendBookingToSheet;
 exports.deleteBookingFromSheet = deleteBookingFromSheet;
 // backend/syncSheets.ts
 const googleapis_1 = require("googleapis");
-const fs_1 = __importDefault(require("fs"));
 const SCOPES = ["https://www.googleapis.com/auth/spreadsheets"];
-const CREDENTIALS = JSON.parse(fs_1.default.readFileSync("google-credentials.json", "utf-8"));
+if (!process.env.GOOGLE_CREDENTIALS) {
+    throw new Error("GOOGLE_CREDENTIALS environment variable is not set");
+}
+const CREDENTIALS = JSON.parse(process.env.GOOGLE_CREDENTIALS);
 const auth = new googleapis_1.google.auth.GoogleAuth({
     credentials: CREDENTIALS,
     scopes: SCOPES,
