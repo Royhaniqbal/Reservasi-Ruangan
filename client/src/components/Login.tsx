@@ -67,9 +67,17 @@ export default function Login({ onLogin, onSwitchToRegister }: LoginProps) {
           />
         </div>
 
-        {/* Right Panel */}
-        <div className="w-2/5 bg-blue-700 flex flex-col justify-center items-center text-white px-10">
-          <div className="max-w-xl w-full">
+        {/* Right Panel dengan background gambar */}
+        <div
+          className="w-2/5 flex flex-col justify-center items-center text-white px-10 bg-cover bg-center relative"
+          style={{
+            backgroundImage: "url('/gedungvokasi.png')",
+          }}
+        >
+          {/* Overlay agar teks tetap terbaca */}
+          <div className="absolute inset-0 bg-blue-800 bg-opacity-70"></div>
+
+          <div className="max-w-xl w-full relative z-10">
             <div className="mb-40">
               <h2 className="text-center text-4xl font-bold">SELAMAT DATANG DI</h2>
               <h1 className="text-center text-8xl font-bold mb-2">SIPAMAN</h1>
@@ -142,13 +150,22 @@ export default function Login({ onLogin, onSwitchToRegister }: LoginProps) {
         </p>
       </div>
 
-      {/* Mobile view (md:hidden) - logo DIHAPUS */}
-      <div className="flex flex-col md:hidden w-full items-center justify-center bg-blue-700 text-white px-6 py-10">
-        <div className="max-w-md w-full">
+      {/* Mobile view (md:hidden) - logo dihapus, background diganti gambar */}
+      <div
+        className="flex flex-col md:hidden w-full items-center justify-center text-white px-6 py-10 bg-cover bg-center relative"
+        style={{
+          backgroundImage: "url('/gedungvokasi.png')",
+        }}
+      >
+        <div className="absolute inset-0 bg-blue-800 bg-opacity-70"></div>
+
+        <div className="max-w-md w-full relative z-10">
           <div className="mb-6 text-center">
             <h2 className="text-2xl font-bold">SELAMAT DATANG DI</h2>
             <h1 className="text-5xl font-bold mb-1">SIPAMAN</h1>
-            <p className="text-lg mb-4">Sistem Informasi Pelayanan Peminjaman Ruangan</p>
+            <p className="text-lg mb-4">
+              Sistem Informasi Pelayanan Peminjaman Ruangan
+            </p>
           </div>
 
           {/* Form Mobile */}
@@ -206,7 +223,9 @@ export default function Login({ onLogin, onSwitchToRegister }: LoginProps) {
             </p>
           </form>
 
-          <p className="mt-6 mb-4 text-[9px] text-center text-white">Dibuat oleh M. Royhan Iqbal</p>
+          <p className="mt-6 mb-4 text-[9px] text-center text-white">
+            Dibuat oleh M. Royhan Iqbal
+          </p>
         </div>
       </div>
     </div>
