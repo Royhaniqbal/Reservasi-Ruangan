@@ -41,7 +41,6 @@ export default function BookingTab({
     { id: 5, name: "Ballroom", capacity: "400 orang", img: "/gambarenam.jpg" },
   ];
 
-  // 🔹 BookingData untuk dikirim ke server
   const bookingData = {
     _id: editingBooking?._id || null,
     room: rooms.find((r) => r.id === selected)?.name || null,
@@ -49,12 +48,10 @@ export default function BookingTab({
     startTime: timeStart || null,
     endTime: timeEnd || null,
     pic: pic || null,
-    unitKerja: unitKerja || null, // ✅ tambahan baru
+    unitKerja: unitKerja || null,
   };
 
-  // ----------------------
   // Helpers time
-  // ----------------------
   const parseToMinutes = (t: string) => {
     const [hh, mm] = t.split(":").map(Number);
     return hh * 60 + mm;
@@ -65,9 +62,7 @@ export default function BookingTab({
     return `${hh}:${mm}`;
   };
 
-  // ----------------------
   // Ambil user (PIC)
-  // ----------------------
   useEffect(() => {
     const fetchUser = async () => {
       const token = localStorage.getItem("token");
@@ -87,9 +82,7 @@ export default function BookingTab({
     fetchUser();
   }, []);
 
-  // ----------------------
   // Isi form kalau sedang edit
-  // ----------------------
   useEffect(() => {
     if (editingBooking) {
       const room = rooms.find((r) => r.name === editingBooking.room);
@@ -98,7 +91,7 @@ export default function BookingTab({
       setTimeStart(editingBooking.startTime || "");
       setTimeEnd(editingBooking.endTime || "");
       setPic(editingBooking.pic || "");
-      setUnitKerja(editingBooking.unitKerja || ""); // ✅ ikut isi jika sedang edit
+      setUnitKerja(editingBooking.unitKerja || "");
     }
   }, [editingBooking]);
 
@@ -126,17 +119,38 @@ export default function BookingTab({
             slots = data.available as AvailabilitySlot[];
           }
 
-          // 👉 kalau sedang edit, tambahkan slot waktu booking lama user
+          // 👉 kalau sedang edit, tambahkan slot lama user lalu gabungkan bila bersebelahan
           if (editingBooking && editingBooking.startTime && editingBooking.endTime) {
-            slots.push({
+            const oldSlot = {
               startTime: editingBooking.startTime,
               endTime: editingBooking.endTime,
-            });
+            };
+            slots.push(oldSlot);
+
+            // 🔹 Gabungkan slot lama dengan slot lain yang berdekatan
+            slots = slots.sort((a, b) => a.startTime.localeCompare(b.startTime));
+            const merged: AvailabilitySlot[] = [];
+
+            for (const s of slots) {
+              if (!merged.length) {
+                merged.push(s);
+              } else {
+                const last = merged[merged.length - 1];
+                if (last.endTime === s.startTime) {
+                  // Gabungkan slot menempel (contoh: 09:00–12:00 + 12:00–17:00)
+                  last.endTime = s.endTime;
+                } else {
+                  merged.push(s);
+                }
+              }
+            }
+
+            slots = merged;
+            console.log("🧩 Final availability slots (merged):", slots);
           }
 
           // Urutkan biar rapi
           slots.sort((a: AvailabilitySlot, b: AvailabilitySlot) => a.startTime.localeCompare(b.startTime));
-
           setAvailability(slots);
         } catch (err) {
           console.error("❌ Error fetch availability:", err);
@@ -150,9 +164,7 @@ export default function BookingTab({
     fetchAvailability();
   }, [bookingData.room, bookingData.date, editingBooking]);
 
-  // ----------------------
-  // Generate opsi start / end
-  // ----------------------
+  // Generate opsi waktu
   const generateStartOptions = (): string[] => {
     if (!availability.length) return [];
     const options: string[] = [];
@@ -171,8 +183,8 @@ export default function BookingTab({
   const generateEndOptions = (): string[] => {
     if (!timeStart || !availability.length) return [];
     const options: string[] = [];
-
     const startMin = parseToMinutes(timeStart);
+
     const slot = availability.find((s: AvailabilitySlot) => {
       const sStart = parseToMinutes(s.startTime);
       const sEnd = parseToMinutes(s.endTime);
@@ -207,9 +219,7 @@ export default function BookingTab({
     }
   }, [timeStart, availability]);
 
-  // ----------------------
   // Simpan / update booking
-  // ----------------------
   const handleSubmit = async () => {
     if (
       !bookingData.room ||
@@ -234,21 +244,13 @@ export default function BookingTab({
       const endpoint = editingBooking ? `${API}/api/book/${bookingData._id}` : `${API}/api/book`;
       const method = editingBooking ? "PUT" : "POST";
 
-      // 🟢 Tambahkan log ini untuk cek data sebelum dikirim
-      // console.log("📤 Data booking dikirim ke backend:", bookingData);
-      // console.log("➡️ Endpoint:", endpoint);
-      // console.log("➡️ Method:", method);
-
       const res = await fetch(endpoint, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(bookingData),
       });
 
-      // console.log("📥 Respon dari backend:", res);
       const data = await res.json().catch(() => ({}));
-      // console.log("📥 Data JSON dari backend:", data);
-
       if (!res.ok || data?.success === false) {
         throw new Error(data.message || "Gagal simpan booking");
       }
@@ -260,7 +262,7 @@ export default function BookingTab({
         startTime: data.startTime || bookingData.startTime,
         endTime: data.endTime || bookingData.endTime,
         pic: data.pic || bookingData.pic,
-        unitKerja: data.unitKerja || bookingData.unitKerja, // ✅ ikut dikembalikan
+        unitKerja: data.unitKerja || bookingData.unitKerja,
       };
 
       if (editingBooking && onFinishEdit) {
