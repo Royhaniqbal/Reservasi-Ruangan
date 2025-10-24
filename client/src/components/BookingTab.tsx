@@ -25,7 +25,10 @@ export default function BookingTab({
   // 🔹 Tambahan: Unit Kerja
   const [unitKerja, setUnitKerja] = useState<string>("");
   const unitOptions = [
-    "Setditjen",
+    "Setditjen-URT",
+    "Setditjen-Keuangan",
+    "Setditjen-SDMA",
+    "Setditjen-PUUKS",
     "Bina Stankom",
     "Bina Intala",
     "Bina Lemlatvok",
