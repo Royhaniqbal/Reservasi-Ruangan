@@ -77,7 +77,7 @@ export default function Register({ onRegister, onSwitchToLogin }: RegisterProps)
           }}
         >
           {/* Overlay transparan biar teks tetap jelas */}
-          <div className="absolute inset-0 bg-blue-900 bg-opacity-70"></div>
+          <div className="absolute inset-0 bg-blue-800 bg-opacity-70"></div>
 
           <div className="relative max-w-xl w-full flex flex-col items-center">
             <div className="mb-16 text-center">
@@ -194,7 +194,7 @@ export default function Register({ onRegister, onSwitchToLogin }: RegisterProps)
           backgroundPosition: "center",
         }}
       >
-        <div className="absolute inset-0 bg-blue-900 bg-opacity-70"></div>
+        <div className="absolute inset-0 bg-blue-800 bg-opacity-70"></div>
 
         <div className="relative max-w-md w-full">
           <div className="mb-6 text-center">
