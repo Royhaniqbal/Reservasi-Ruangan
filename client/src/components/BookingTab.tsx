@@ -26,6 +26,7 @@ export default function BookingTab({
   const [unitKerja, setUnitKerja] = useState<string>("");
   const unitOptions = [
     "Setditjen-URT",
+    "Setditjen-PEP",
     "Setditjen-Keuangan",
     "Setditjen-SDMA",
     "Setditjen-PUUKS",
