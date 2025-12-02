@@ -301,26 +301,58 @@ export default function BookingTab({
         {/* Ruangan */}
         <div className="flex-1">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-            {rooms.map((room) => (
+          {rooms.map((room) => {
+            const isDisabled = room.id === 3; // 🔥 Nonaktifkan Command Center
+
+            return (
               <div
                 key={room.id}
                 className={`w-full bg-transparent border-2 rounded-xl flex flex-col justify-between items-center p-3 transition
-                  ${selected === room.id ? "border-blue-500 shadow-xl" : "border-gray-300 shadow-sm"}`}
+                  ${
+                    selected === room.id && !isDisabled
+                      ? "border-blue-500 shadow-xl"
+                      : "border-gray-300 shadow-sm"
+                  }
+                  ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}
+                `}
               >
                 <div className="flex flex-col items-center">
-                  <img src={room.img} alt={room.name} className="w-full h-40 object-cover mb-2 rounded-lg" />
+                  <img
+                    src={room.img}
+                    alt={room.name}
+                    className="w-full h-40 object-cover mb-2 rounded-lg"
+                  />
                   <p className="text-base text-center">{room.name}</p>
-                  <p className="text-sm text-center font-normal mt-0.5">(Kapasitas {room.capacity})</p>
+                  <p className="text-sm text-center font-normal mt-0.5">
+                    (Kapasitas {room.capacity})
+                  </p>
+
+                  {isDisabled && (
+                    <p className="text-xs text-red-500 mt-1 font-semibold">
+                      Tidak tersedia
+                    </p>
+                  )}
                 </div>
+
                 <button
-                  onClick={() => setSelected(room.id)}
+                  disabled={isDisabled}
+                  onClick={() => !isDisabled && setSelected(room.id)}
                   className={`px-4 py-1 rounded-lg mt-3 text-white transition
-                    ${selected === room.id ? "bg-blue-700" : "bg-blue-300 hover:bg-blue-700"}`}
+                    ${
+                      isDisabled
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : selected === room.id
+                        ? "bg-blue-700"
+                        : "bg-blue-300 hover:bg-blue-700"
+                    }
+                  `}
                 >
-                  Pilih
+                  {isDisabled ? "Tidak Bisa Dipilih" : "Pilih"}
                 </button>
               </div>
-            ))}
+            );
+          })}
+
           </div>
         </div>
 
