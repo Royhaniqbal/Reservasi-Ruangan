@@ -4,8 +4,12 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center border-t-4 border-blue-600">
-        <div className="flex justify-center mb-6">
-          <img src="/logokemnaker.png" alt="Logo Kemnaker" className="h-16" />
+        
+        {/* Kontainer Logo */}
+        <div className="flex items-center justify-center gap-4 mb-6">
+          <img src="/logokemnaker.png" alt="Logo Kemnaker" className="h-12 w-auto" />
+          <div className="h-8 w-[1px] bg-gray-300"></div> {/* Garis pemisah tipis */}
+          <img src="/logovokasi.png" alt="Logo Pelatihan Vokasi" className="h-6 w-auto" />
         </div>
         
         <h1 className="text-2xl font-bold text-gray-800 mb-4">
@@ -19,7 +23,7 @@ function App() {
         
         <a 
           href="https://sipaman-binalavotas.kemnaker.go.id" 
-          className="inline-block w-full bg-blue-600 hover:bg-blue-700 text-white hover:text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200 shadow-md"
+          className="inline-block w-full bg-blue-600 hover:bg-blue-700 text-white hover:text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200 shadow-md text-center"
         >
           Buka SIPAMAN V2
         </a>
