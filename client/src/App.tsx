@@ -18,7 +18,7 @@ function App() {
         
         <p className="text-gray-600 mb-8 leading-relaxed">
           Aplikasi **SIPAMAN V1** ini sudah tidak aktif. <br />
-          Silakan akses aplikasi **SIPAMAN V2** melalui tautan resmi di bawah ini:
+          Silakan akses aplikasi **SIPAMAN V2** melalui tautan resmi di bawah ini. Kemudian buat akun baru dengan mengisi data diri lengkap.
         </p>
         
         <a 
