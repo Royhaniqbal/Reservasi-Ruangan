@@ -23,7 +23,7 @@ function App() {
         
         <a 
           href="https://sipaman-binalavotas.kemnaker.go.id" 
-          className="inline-block w-full bg-blue-600 hover:bg-blue-700 text-white hover:text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200 shadow-md text-center"
+          className="inline-block w-full bg-blue-500 hover:bg-blue-700 text-white hover:text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200 shadow-md text-center"
         >
           Buka SIPAMAN V2
         </a>
